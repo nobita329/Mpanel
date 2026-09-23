@@ -2,14 +2,16 @@ name: Create Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. v1.0.0)'
+        description: 'Release version (e.g. v2.5.3)'
         required: true
-        default: 'v1.0.0'
+        default: 'v2.5.3'
 
 permissions:
   contents: write
@@ -22,6 +24,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,9 +40,24 @@ jobs:
         id: get_version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
           else
-            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            PKG_VER=$(node -p "require('./package.json').version")
+            VERSION="v${PKG_VER}"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Release Version: ${VERSION}"
+
+      - name: Create Git Tag if missing
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          if ! git rev-parse "$VERSION" >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$VERSION" -m "Release $VERSION"
+            git push origin "$VERSION" || echo "Tag may already exist on remote"
           fi
 
       - name: Package Mpanel Tarball & Zip
@@ -62,13 +81,19 @@ jobs:
           body: |
             ## 🎮 Mpanel - Full Node.js Game & App Management Web Panel
 
+            ### ✨ What's New in ${{ steps.get_version.outputs.VERSION }}
+            - Added **LucentUI Theme v2.0.0** (Zaqua / AquaGeprek minimalist glass aesthetic)
+            - Added **DezerX Theme & Vulcan Asset Suite** (Official game banners, CPU monitors, OS badges)
+            - Added **Java 26** support (`ghcr.io/pterodactyl/yolks:java_26`)
+            - Real-time glassmorphism, multi-theme selector, and enhanced server cards
+
             ### 🚀 Port Architecture
             - **Web UI & Console WebSocket**: Port `3001`
             - **Panel & Daemon REST API**: Port `3003`
             - **Embedded SFTP Server**: Port `3004`
 
-            ### 📦 Supported Servers
-            - **Minecraft**: Java 8-25 & Bedrock (Paper, Purpur, Fabric, Forge, NeoForge, Quilt, Velocity, etc.)
+            ### 📦 Supported Environments
+            - **Minecraft**: Java 8-26 & Bedrock (Paper, Purpur, Fabric, Forge, NeoForge, Quilt, Velocity, etc.)
             - **Node.js**: v12 - v25 Apps & Bots
             - **Python**: v2.7, 3.7 - 3.13 Apps & Bots
 
@@ -76,13 +101,13 @@ jobs:
             ```bash
             # Interactive Menu
             ./menu.sh
-            
+
             # Install & Build
             ./menu.sh install
-            
+
             # Create Admin User
             ./menu.sh usercreate
-            
+
             # Start with PM2
             ./menu.sh pm2
             ```

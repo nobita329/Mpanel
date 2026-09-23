@@ -16,11 +16,11 @@ class AuthController {
           <div class="text-center space-y-2 mb-6">
             ${isPterox && loginLogo ? `
               <div class="flex justify-center mb-2">
-                <img src="${loginLogo}" alt="${brandName}" class="h-10 object-contain drop-shadow max-w-[200px]" onerror="this.src='/images/pterox-login-logo.webp'">
+                <img src="${loginLogo}" alt="${brandName}" class="h-10 object-contain drop-shadow max-w-[200px]" onerror="this.src='/images/meta/Logo.png'">
               </div>
             ` : `
-              <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
-                <i data-lucide="lock" class="w-6 h-6"></i>
+              <div class="flex justify-center mb-2">
+                <img src="/images/meta/Logo.png" alt="Logo" class="h-12 w-auto object-contain drop-shadow" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400\\'><i data-lucide=\\'lock\\' class=\\'w-6 h-6\\'></i></div>'; if(window.lucide) lucide.createIcons();">
               </div>
             `}
             <h3 class="text-xl font-extrabold text-white">Sign In to ${brandName}</h3>
@@ -91,11 +91,11 @@ class AuthController {
           <div class="text-center space-y-2 mb-6">
             ${isPterox && loginLogo ? `
               <div class="flex justify-center mb-2">
-                <img src="${loginLogo}" alt="${brandName}" class="h-10 object-contain drop-shadow max-w-[200px]" onerror="this.src='/images/pterox-login-logo.webp'">
+                <img src="${loginLogo}" alt="${brandName}" class="h-10 object-contain drop-shadow max-w-[200px]" onerror="this.src='/images/meta/Logo.png'">
               </div>
             ` : `
-              <div class="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-400">
-                <i data-lucide="user-plus" class="w-6 h-6"></i>
+              <div class="flex justify-center mb-2">
+                <img src="/images/meta/Logo.png" alt="Logo" class="h-12 w-auto object-contain drop-shadow" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-400\\'><i data-lucide=\\'user-plus\\' class=\\'w-6 h-6\\'></i></div>'; if(window.lucide) lucide.createIcons();">
               </div>
             `}
             <h3 class="text-xl font-extrabold text-white">Create ${brandName} Account</h3>

@@ -1,3 +1,5 @@
+
+
 // Admin Portal Management Suite
 class AdminManager {
   // 1. Admin Overview
@@ -2296,6 +2298,8 @@ class AdminManager {
           targetJava = 'ghcr.io/pterodactyl/yolks:java_8';
         }
       } else if (major >= 26) {
+        targetJava = 'ghcr.io/pterodactyl/yolks:java_26';
+      } else if (major >= 25) {
         targetJava = 'ghcr.io/pterodactyl/yolks:java_25';
       }
     }
@@ -2307,7 +2311,8 @@ class AdminManager {
 
     const tag = document.getElementById('deploy-java-tag');
     if (tag) {
-      const label = targetJava.includes('java_21') ? 'Java 21' :
+      const label = targetJava.includes('java_26') ? 'Java 26' :
+                    targetJava.includes('java_21') ? 'Java 21' :
                     targetJava.includes('java_17') ? 'Java 17' :
                     targetJava.includes('java_8')  ? 'Java 8'  :
                     targetJava.includes('java_25') ? 'Java 25' :
@@ -2349,10 +2354,11 @@ class AdminManager {
     if (!select) return;
 
     const mcImages = [
+      { label: 'Java 26 (ghcr.io/pterodactyl/yolks:java_26)', value: 'ghcr.io/pterodactyl/yolks:java_26' },
+      { label: 'Java 25 (ghcr.io/pterodactyl/yolks:java_25)', value: 'ghcr.io/pterodactyl/yolks:java_25' },
       { label: 'Java 21 (ghcr.io/pterodactyl/yolks:java_21)', value: 'ghcr.io/pterodactyl/yolks:java_21' },
       { label: 'Java 17 (ghcr.io/pterodactyl/yolks:java_17)', value: 'ghcr.io/pterodactyl/yolks:java_17' },
       { label: 'Java 8 (ghcr.io/pterodactyl/yolks:java_8)', value: 'ghcr.io/pterodactyl/yolks:java_8' },
-      { label: 'Java 25 (ghcr.io/pterodactyl/yolks:java_25)', value: 'ghcr.io/pterodactyl/yolks:java_25' },
       { label: 'Java 16 (ghcr.io/pterodactyl/yolks:java_16)', value: 'ghcr.io/pterodactyl/yolks:java_16' },
       { label: 'Java 11 (ghcr.io/pterodactyl/yolks:java_11)', value: 'ghcr.io/pterodactyl/yolks:java_11' }
     ];

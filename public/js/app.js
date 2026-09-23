@@ -218,17 +218,33 @@ class App {
       }
     }
 
-    // Active UI Theme (Arix Theme vs NookTheme vs LiquidX Theme vs PteroX Theme)
-    const activeTheme = s.active_theme || localStorage.getItem('mpanel_active_theme') || 'arix';
+    // Active UI Theme (Arix Theme vs NookTheme vs LiquidX Theme vs PteroX Theme vs DezerX Theme vs LucentUI)
+    const activeTheme = s.active_theme || localStorage.getItem('mpanel_active_theme') || 'lucent';
     localStorage.setItem('mpanel_active_theme', activeTheme);
     this.activeTheme = activeTheme;
 
-    document.documentElement.classList.remove('theme-arix', 'theme-nook', 'theme-liquidx', 'theme-pterox', 'theme-nebula');
+    document.documentElement.classList.remove('theme-arix', 'theme-nook', 'theme-liquidx', 'theme-pterox', 'theme-nebula', 'theme-dezerx', 'theme-lucent');
 
     const logoEl = document.getElementById('header-logo-img');
     const subNameEl = document.getElementById('header-sub-name');
 
-    if (activeTheme === 'nebula') {
+    if (activeTheme === 'lucent') {
+      document.documentElement.classList.add('theme-lucent');
+      if (logoEl && (!s.panel_logo || s.panel_logo === '/assets/mpanel-logo.svg' || s.panel_logo === '/arix/Arix.png' || s.panel_logo === '/assets/liquidx-logo.svg' || s.panel_logo === '/images/pterox-header-logo.webp')) {
+        logoEl.src = '/assets/lucent-logo.svg';
+      }
+      if (subNameEl && (!s.panel_name || s.panel_name === 'Angelillo15' || s.panel_name === 'Mpanel' || subNameEl.innerText.includes('Theme') || subNameEl.innerText.includes('Server Engine') || subNameEl.innerText.includes('PteroX'))) {
+        subNameEl.innerText = 'LucentUI Minimalist Engine';
+      }
+    } else if (activeTheme === 'dezerx') {
+      document.documentElement.classList.add('theme-dezerx');
+      if (logoEl && (!s.panel_logo || s.panel_logo === '/assets/mpanel-logo.svg' || s.panel_logo === '/arix/Arix.png' || s.panel_logo === '/assets/liquidx-logo.svg' || s.panel_logo === '/images/pterox-header-logo.webp')) {
+        logoEl.src = '/images/meta/Logo.png';
+      }
+      if (subNameEl && (!s.panel_name || s.panel_name === 'Angelillo15' || s.panel_name === 'Mpanel' || subNameEl.innerText.includes('Theme') || subNameEl.innerText.includes('Server Engine') || subNameEl.innerText.includes('PteroX'))) {
+        subNameEl.innerText = 'DezerX Vulcan Cloud';
+      }
+    } else if (activeTheme === 'nebula') {
       document.documentElement.classList.add('theme-nebula');
       if (logoEl && (!s.panel_logo || s.panel_logo === '/assets/mpanel-logo.svg' || s.panel_logo === '/arix/Arix.png' || s.panel_logo === '/assets/liquidx-logo.svg' || s.panel_logo === '/images/pterox-header-logo.webp')) {
         logoEl.src = '/assets/nebula-logo.svg';
@@ -1205,20 +1221,25 @@ class App {
 
   // HTML Template for Server Card
   renderServerCardHTML(s) {
-    if (this.activeTheme === 'pterox') {
+    if (this.activeTheme === 'pterox' || this.activeTheme === 'dezerx' || this.activeTheme === 'lucent') {
       return this.renderPteroxServerCardHTML(s);
     }
     const isSuspended = !!s.is_suspended || s.status === 'suspended';
     const statusCfg = this.getServerStatusConfig(s.status, isSuspended);
 
     const typeIcons = {
-      minecraft: '🎮 Minecraft',
-      nodejs: '⚡ Node.js',
+      minecraft: '<img src="/images/icons/minecraft-icon.webp" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">Minecraft',
+      nodejs: '<img src="/images/icons/nodejs.png" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">Node.js',
       python: '🐍 Python',
       lumenvm: '🖥️ VM - KVM',
       nokvm: '🛡️ VM - No-KVM',
       lumenvm_nokvm: '🛡️ VM - No-KVM',
-      vm: '🖥️ VM - KVM'
+      vm: '🖥️ VM - KVM',
+      cs2: '<img src="/images/icons/cs2-icon.webp" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">CS2',
+      rust: '<img src="/images/icons/rust-icon.webp" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">Rust',
+      ark: '<img src="/images/icons/ark-icon.webp" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">ARK',
+      gmod: '<img src="/images/icons/gmod-icon.webp" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">GMod',
+      valheim: '<img src="/images/icons/valheim-icon.webp" class="w-3.5 h-3.5 inline-block mr-1 align-text-bottom rounded object-contain" onerror="this.remove()">Valheim'
     };
 
     let expBadge = '';
@@ -1305,7 +1326,18 @@ class App {
     const isSuspended = !!s.is_suspended || s.status === 'suspended';
     const statusCfg = this.getServerStatusConfig(s.status, isSuspended);
 
-    const bannerImg = localStorage.getItem('pterox_server_banner') || '/images/server-banner.jpg';
+    const typeBannerMap = {
+      minecraft: '/images/banners/minecraft-banners.webp',
+      nodejs: '/images/banners/node.webp',
+      node: '/images/banners/node.webp',
+      cs2: '/images/banners/cs2-banner.webp',
+      rust: '/images/banners/rust-banner.webp',
+      ark: '/images/banners/ark-banners.webp',
+      gmod: '/images/banners/gmod-banner.webp',
+      valheim: '/images/banners/valheim-banner.webp',
+    };
+    const customBanner = localStorage.getItem('pterox_server_banner');
+    const bannerImg = customBanner || (s.server_type && typeBannerMap[s.server_type.toLowerCase()]) || '/images/server-banner.jpg';
     const ipPort = `${s.ip || '127.0.0.1'}:${s.port || 25565}`;
 
     let statusText = statusCfg.label;

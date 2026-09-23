@@ -1,0 +1,128 @@
+/* ==========================================================================
+   DezerX / Vulcan Theme ("Next-Gen Cyber Hosting Platform")
+   Assets powered by pngg.zip
+   ========================================================================== */
+:root.theme-dezerx, html.theme-dezerx, .theme-dezerx {
+  --primary: #38bdf8;
+  --dezer-cyan: #38bdf8;
+  --dezer-cyan-glow: rgba(56, 189, 248, 0.35);
+  --dezer-purple: #818cf8;
+  --dezer-bg: #090d16;
+  --dezer-card: #0f172a;
+  --dezer-card-hover: #1e293b;
+  --dezer-border: rgba(255, 255, 255, 0.08);
+}
+
+html.theme-dezerx body {
+  background: radial-gradient(1200px 800px at 50% -10%, rgba(56, 189, 248, 0.12), transparent 60%),
+              radial-gradient(900px 600px at 100% 100%, rgba(129, 140, 248, 0.08), transparent 50%),
+              #090d16 !important;
+  background-attachment: fixed !important;
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+html.theme-dezerx #overlay-layer {
+  background: rgba(9, 13, 22, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+html.theme-dezerx .glass-panel {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.theme-dezerx .glass-card {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+html.theme-dezerx .glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.15) !important;
+}
+
+html.theme-dezerx .btn-cyber {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%) !important;
+  color: #031326 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35) !important;
+  border: none !important;
+}
+
+html.theme-dezerx .btn-cyber:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.5) !important;
+}
+
+html.theme-dezerx .glass-input {
+  background: rgba(3, 7, 18, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+html.theme-dezerx .glass-input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25) !important;
+}
+
+html.theme-dezerx .nook-sidebar {
+  background: rgba(10, 15, 29, 0.95) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px);
+}
+
+html.theme-dezerx .nook-topbar {
+  background: rgba(10, 15, 29, 0.9) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px);
+}
+
+html.theme-dezerx .nook-nav-item.active {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15) !important;
+}
+
+html.theme-dezerx .nook-nav-item.active .nook-icon-box {
+  background: #38bdf8 !important;
+  color: #031326 !important;
+}
+
+/* DezerX Server Card with Banner Integration */
+html.theme-dezerx .pterox-server-card {
+  background: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.25s ease !important;
+}
+
+html.theme-dezerx .pterox-server-card:hover {
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+}
+
+html.theme-dezerx .pterox-server-card-banner {
+  height: 110px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  position: relative !important;
+  padding: 0.85rem !important;
+}
+
+html.theme-dezerx .pterox-server-card-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(9, 13, 22, 0.2) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+

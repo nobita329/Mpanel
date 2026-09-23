@@ -225,6 +225,58 @@ class SettingsManager {
                     </button>
                   </div>
                 </div>
+
+                <!-- Option F: DezerX / Vulcan Theme -->
+                <div id="theme-card-dezerx" onclick="settingsManager.selectTheme('dezerx')" class="theme-select-card p-5 rounded-2xl border ${this.currentTheme.activeTheme === 'dezerx' ? 'active bg-sky-950/20 border-sky-500/50 ring-1 ring-sky-500/30' : 'bg-slate-900/40 border-white/5 hover:border-white/20'} flex flex-col justify-between space-y-4">
+                  <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 p-1.5 flex items-center justify-center shadow-inner">
+                      <img src="/images/meta/Logo.png" alt="DezerX Theme" class="w-full h-full object-contain">
+                    </div>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">DezerX Vulcan</span>
+                  </div>
+                  <div>
+                    <h4 class="text-base font-bold text-white flex items-center gap-1.5">
+                      DezerX Theme <span class="text-xs text-sky-400 font-normal">v1.0</span>
+                    </h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">High-performance cyber hosting theme with official game banners, CPU hardware monitors, OS distro badges, and official logo suite.</p>
+                  </div>
+                  <div class="pt-2 flex items-center justify-between border-t border-white/5">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-3 h-3 rounded-full bg-[#38bdf8]"></span>
+                      <span class="w-3 h-3 rounded-full bg-[#818cf8]"></span>
+                      <span class="w-3 h-3 rounded-full bg-[#090d16]"></span>
+                    </div>
+                    <button type="button" id="btn-theme-dezerx" class="text-xs font-semibold px-3 py-1.5 rounded-lg ${this.currentTheme.activeTheme === 'dezerx' ? 'btn-cyber' : 'bg-white/5 text-slate-300 hover:bg-white/10'}">
+                      ${this.currentTheme.activeTheme === 'dezerx' ? '✓ Active Theme' : 'Activate DezerX'}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Option G: LucentUI Theme v2.0 -->
+                <div id="theme-card-lucent" onclick="settingsManager.selectTheme('lucent')" class="theme-select-card p-5 rounded-2xl border ${this.currentTheme.activeTheme === 'lucent' ? 'active bg-indigo-950/20 border-indigo-500/50 ring-1 ring-indigo-500/30' : 'bg-slate-900/40 border-white/5 hover:border-white/20'} flex flex-col justify-between space-y-4">
+                  <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 p-2 flex items-center justify-center shadow-inner">
+                      <img src="/assets/lucent-logo.svg" alt="LucentUI Theme" class="w-full h-full object-contain">
+                    </div>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">LucentUI v2.0</span>
+                  </div>
+                  <div>
+                    <h4 class="text-base font-bold text-white flex items-center gap-1.5">
+                      LucentUI <span class="text-xs text-indigo-400 font-normal">v2.0.0</span>
+                    </h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">Zaqua / AquaGeprek signature minimalist glass hosting theme with indigo obsidian glow, frosted panels, and dynamic banner cards.</p>
+                  </div>
+                  <div class="pt-2 flex items-center justify-between border-t border-white/5">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-3 h-3 rounded-full bg-[#4f6ef7]"></span>
+                      <span class="w-3 h-3 rounded-full bg-[#7b81b2]"></span>
+                      <span class="w-3 h-3 rounded-full bg-[#13131c]"></span>
+                    </div>
+                    <button type="button" id="btn-theme-lucent" class="text-xs font-semibold px-3 py-1.5 rounded-lg ${this.currentTheme.activeTheme === 'lucent' ? 'btn-cyber' : 'bg-white/5 text-slate-300 hover:bg-white/10'}">
+                      ${this.currentTheme.activeTheme === 'lucent' ? '✓ Active Theme' : 'Activate LucentUI'}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Arix Theme Enhancements (Audio FX & Colors) -->
@@ -336,6 +388,32 @@ class SettingsManager {
                     <div class="h-10 rounded-lg bg-black/40 flex items-center justify-center p-1 border border-white/5">
                       <img src="${localStorage.getItem('pterox_login_header_logo') || '/images/pterox-login-header-logo.webp'}" class="h-8 w-auto object-contain" id="prev-pterox-login-header">
                     </div>
+                  </div>
+                </div>
+
+                <!-- Server Banner & Theme Assets Suite -->
+                <div class="p-3.5 rounded-xl bg-black/30 border border-white/5 space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <span class="text-xs font-bold text-cyan-300">5. Server Card Banner</span>
+                      <p class="text-[11px] text-slate-400">Choose a default card banner or pick from game banner presets</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col sm:flex-row gap-3 items-center">
+                    <input type="text" id="pterox-cfg-banner" value="${localStorage.getItem('pterox_server_banner') || '/images/server-banner.jpg'}" class="w-full glass-input px-2.5 py-1.5 rounded-lg text-[11px] font-mono" placeholder="/images/server-banner.jpg" oninput="const p = document.getElementById('prev-pterox-banner'); if(p) p.src = this.value">
+                    <div class="h-10 w-28 rounded-lg bg-black/40 overflow-hidden border border-white/5 shrink-0">
+                      <img src="${localStorage.getItem('pterox_server_banner') || '/images/server-banner.jpg'}" class="w-full h-full object-cover" id="prev-pterox-banner">
+                    </div>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5 pt-1">
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/server-banner.jpg')" class="text-[10px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10">Default</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/minecraft-banners.webp')" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20">Minecraft</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/node.webp')" class="text-[10px] px-2 py-0.5 rounded bg-green-500/10 hover:bg-green-500/20 text-green-300 border border-green-500/20">Node.js</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/cs2-banner.webp')" class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20">CS2</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/rust-banner.webp')" class="text-[10px] px-2 py-0.5 rounded bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 border border-orange-500/20">Rust</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/ark-banners.webp')" class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/20">ARK</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/gmod-banner.webp')" class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20">GMod</button>
+                    <button type="button" onclick="settingsManager.setPteroxBanner('/images/banners/valheim-banner.webp')" class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20">Valheim</button>
                   </div>
                 </div>
               </div>
@@ -471,6 +549,149 @@ class SettingsManager {
                     <button type="button" onclick="window.nebulaEditor.resetToDefault()" class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 transition flex items-center gap-1 shrink-0">
                       <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Defaults
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DezerX & Vulcan Asset Gallery -->
+              <div class="pt-4 border-t border-white/10 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                      <i data-lucide="image" class="w-4 h-4 text-sky-400"></i> DezerX &amp; Vulcan Theme Asset Suite
+                    </h4>
+                    <p class="text-[11px] text-slate-400">All loaded PNG/WebP graphics: banners, game icons, CPU badges, OS distros, and region flags</p>
+                  </div>
+                </div>
+
+                <!-- Banners Showcase -->
+                <div class="space-y-2">
+                  <span class="text-xs font-bold text-slate-300">Game &amp; Server Banners</span>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/minecraft-banners.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">Minecraft</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/node.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">Node.js</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/cs2-banner.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">Counter-Strike 2</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/rust-banner.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">Rust</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/ark-banners.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">ARK: Survival</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/gmod-banner.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">Garry's Mod</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/banners/valheim-banner.webp" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-white">Valheim</span>
+                      </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 group relative">
+                      <img src="/images/meta/Banner.png" class="w-full h-20 object-cover group-hover:scale-105 transition duration-300">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex items-end p-2">
+                        <span class="text-[11px] font-bold text-sky-400">DezerX Master</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hardware & Icons Showcase -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <!-- Game Icons -->
+                  <div class="p-3 rounded-xl bg-black/20 border border-white/5 space-y-2">
+                    <span class="text-xs font-bold text-slate-300">Game Server Icons</span>
+                    <div class="flex flex-wrap gap-2">
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/icons/minecraft-icon.webp" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Minecraft</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/icons/nodejs.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Node.js</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/icons/cs2-icon.webp" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">CS2</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/icons/rust-icon.webp" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Rust</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/icons/ark-icon.webp" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">ARK</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/icons/valheim-icon.webp" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Valheim</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- CPU Badges -->
+                  <div class="p-3 rounded-xl bg-black/20 border border-white/5 space-y-2">
+                    <span class="text-xs font-bold text-slate-300">Dedicated CPU Badges</span>
+                    <div class="flex flex-wrap gap-2">
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/cpu/ryzen9.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Ryzen 9</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/cpu/ryzen7.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Ryzen 7</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/cpu/intel.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Intel Core</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- OS Distros -->
+                  <div class="p-3 rounded-xl bg-black/20 border border-white/5 space-y-2">
+                    <span class="text-xs font-bold text-slate-300">Operating Systems</span>
+                    <div class="flex flex-wrap gap-2">
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/os/ubuntu.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Ubuntu</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/os/debian.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Debian</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/os/windows.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Windows</span>
+                      </div>
+                      <div class="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+                        <img src="/images/os/fedora.png" class="w-5 h-5 object-contain">
+                        <span class="text-[10px] text-slate-300 font-medium">Fedora</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1182,7 +1403,13 @@ class SettingsManager {
       arix_primary_color: this.currentTheme.arixPrimaryColor,
       liquidx_primary_color: this.currentTheme.liquidxPrimaryColor
     });
-    if (themeName === 'nebula') {
+    if (themeName === 'lucent') {
+      app.playSound('online');
+      app.toast('LucentUI Theme v2.0 activated!', 'success');
+    } else if (themeName === 'dezerx') {
+      app.playSound('online');
+      app.toast('DezerX Vulcan Theme activated!', 'success');
+    } else if (themeName === 'nebula') {
       app.playSound('online');
       app.toast('Nebula Theme v2.0 activated!', 'success');
       if (window.nebulaEditor) {
@@ -1223,10 +1450,22 @@ class SettingsManager {
     localStorage.setItem('pterox_sidebar_logo', sidebarLogo);
     localStorage.setItem('pterox_header_logo', headerLogo);
     localStorage.setItem('pterox_login_logo', loginLogo);
-    localStorage.setItem('pterox_login_header_logo', loginHeaderLogo);
+    const bannerEl = document.getElementById('pterox-cfg-banner');
+    if (bannerEl) {
+      localStorage.setItem('pterox_server_banner', bannerEl.value.trim());
+    }
 
     app.toast('PteroX branding configuration saved!', 'success');
     app.applyBrandingAndTheme({ active_theme: this.currentTheme.activeTheme });
+  }
+
+  setPteroxBanner(url) {
+    const input = document.getElementById('pterox-cfg-banner');
+    const preview = document.getElementById('prev-pterox-banner');
+    if (input) input.value = url;
+    if (preview) preview.src = url;
+    localStorage.setItem('pterox_server_banner', url);
+    app.toast('Server banner updated!', 'success');
   }
 
   togglePanelSounds(enabled) {
@@ -1248,11 +1487,15 @@ class SettingsManager {
     const cardLiquidx = document.getElementById('theme-card-liquidx');
     const cardPterox = document.getElementById('theme-card-pterox');
     const cardNebula = document.getElementById('theme-card-nebula');
+    const cardDezerx = document.getElementById('theme-card-dezerx');
+    const cardLucent = document.getElementById('theme-card-lucent');
     const btnArix = document.getElementById('btn-theme-arix');
     const btnNook = document.getElementById('btn-theme-nook');
     const btnLiquidx = document.getElementById('btn-theme-liquidx');
     const btnPterox = document.getElementById('btn-theme-pterox');
     const btnNebula = document.getElementById('btn-theme-nebula');
+    const btnDezerx = document.getElementById('btn-theme-dezerx');
+    const btnLucent = document.getElementById('btn-theme-lucent');
     const badge = document.getElementById('active-theme-badge');
     const arixPanel = document.getElementById('arix-options-panel');
     const liquidxPanel = document.getElementById('liquidx-options-panel');
@@ -1265,14 +1508,18 @@ class SettingsManager {
         arix: 'Arix Theme v2.1.3 Active',
         liquidx: 'LiquidX Theme v1.0 Active',
         pterox: 'PteroX Theme v2.0.2 Active',
-        nebula: 'Nebula Theme v2.0 Active'
+        nebula: 'Nebula Theme v2.0 Active',
+        dezerx: 'DezerX Vulcan Theme Active',
+        lucent: 'LucentUI Theme v2.0 Active'
       };
       const badgeClasses = {
         nook: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
         arix: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
         liquidx: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
         pterox: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
-        nebula: 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+        nebula: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+        dezerx: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+        lucent: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
       };
       badge.innerText = labels[theme] || `${theme} Active`;
       badge.className = `text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${badgeClasses[theme] || badgeClasses.nook}`;
@@ -1291,8 +1538,30 @@ class SettingsManager {
     resetCard(cardLiquidx, btnLiquidx, 'LiquidX');
     resetCard(cardPterox, btnPterox, 'PteroX');
     resetCard(cardNebula, btnNebula, 'Nebula');
+    resetCard(cardDezerx, btnDezerx, 'DezerX');
+    resetCard(cardLucent, btnLucent, 'LucentUI');
 
-    if (theme === 'nebula') {
+    if (theme === 'lucent') {
+      if (cardLucent) cardLucent.className = 'theme-select-card p-5 rounded-2xl border active bg-indigo-950/20 border-indigo-500/50 ring-1 ring-indigo-500/30 flex flex-col justify-between space-y-4';
+      if (btnLucent) {
+        btnLucent.innerText = '✓ Active Theme';
+        btnLucent.className = 'text-xs font-semibold px-3 py-1.5 rounded-lg btn-cyber';
+      }
+      if (arixPanel) arixPanel.classList.add('opacity-60');
+      if (liquidxPanel) liquidxPanel.classList.add('opacity-60');
+      if (pteroxPanel) pteroxPanel.classList.add('opacity-60');
+      if (nebulaPanel) nebulaPanel.classList.add('opacity-60');
+    } else if (theme === 'dezerx') {
+      if (cardDezerx) cardDezerx.className = 'theme-select-card p-5 rounded-2xl border active bg-sky-950/20 border-sky-500/50 ring-1 ring-sky-500/30 flex flex-col justify-between space-y-4';
+      if (btnDezerx) {
+        btnDezerx.innerText = '✓ Active Theme';
+        btnDezerx.className = 'text-xs font-semibold px-3 py-1.5 rounded-lg btn-cyber';
+      }
+      if (arixPanel) arixPanel.classList.add('opacity-60');
+      if (liquidxPanel) liquidxPanel.classList.add('opacity-60');
+      if (pteroxPanel) pteroxPanel.classList.add('opacity-60');
+      if (nebulaPanel) nebulaPanel.classList.add('opacity-60');
+    } else if (theme === 'nebula') {
       if (cardNebula) cardNebula.className = 'theme-select-card p-5 rounded-2xl border active bg-purple-950/20 border-purple-500/50 ring-1 ring-purple-500/30 flex flex-col justify-between space-y-4';
       if (btnNebula) {
         btnNebula.innerText = '✓ Active Theme';

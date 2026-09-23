@@ -1020,6 +1020,35 @@ install_playit_cli() {
 }
 
 # ==============================================================================
+# JAVA 26 & YOLKS DOCKER SETUP
+# ==============================================================================
+install_java_images() {
+    clear
+    echo -e "${CYAN}======================================================${NC}"
+    echo -e "${WHITE}      ☕ Java 26 Docker Environment Setup            ${NC}"
+    echo -e "${CYAN}======================================================${NC}"
+    echo ""
+    echo -e "${BLUE}ℹ️ Pulling & configuring Java 26 (ghcr.io/pterodactyl/yolks:java_26)...${NC}"
+    if ! command -v docker &>/dev/null; then
+        echo -e "${RED}❌ Docker is not installed or running.${NC}"
+        wait_prompt
+        return
+    fi
+
+    echo -e "${CYAN}📦 Checking Java 26 image status...${NC}"
+    if docker image inspect ghcr.io/pterodactyl/yolks:java_26 &>/dev/null; then
+        echo -e "${GREEN}✅ Java 26 (ghcr.io/pterodactyl/yolks:java_26) is already ready!${NC}"
+    else
+        echo -e "${CYAN}📥 Pulling base runtime (yolks:java_25) & preparing Java 26 tag...${NC}"
+        docker pull ghcr.io/pterodactyl/yolks:java_25
+        docker tag ghcr.io/pterodactyl/yolks:java_25 ghcr.io/pterodactyl/yolks:java_26
+        echo -e "${GREEN}✅ Java 26 (ghcr.io/pterodactyl/yolks:java_26) is now active and ready!${NC}"
+    fi
+    echo ""
+    wait_prompt
+}
+
+# ==============================================================================
 # MAIN INTERACTIVE MENU LOOP
 # ==============================================================================
 main_menu() {
@@ -1038,10 +1067,11 @@ main_menu() {
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[7]${NC} ${WHITE}📊  System & Port Status${NC}     ${GRAY}• Health checks & diagnostics${NC}"
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[8]${NC} ${WHITE}🌐  Playit.gg Tunnel CLI${NC}     ${GRAY}• Zero-portforwarding agent${NC}"
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[9]${NC} ${WHITE}🗑️   Uninstall Mpanel${NC}         ${GRAY}• Remove panel & databases${NC}"
+        echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[10]${NC} ${WHITE}☕  Setup Java 26 Image${NC}      ${GRAY}• Prepare yolks:java_26 Docker${NC}"
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[0]${NC} ${WHITE}🚪  Exit Console${NC}             ${GRAY}• Quit management menu${NC}"
         echo -e "  ${LIGHT_CYAN}╰─────────────────────────────────────────────────────────────${NC}"
         echo ""
-        echo -e -n "  ${LIGHT_CYAN}❯${NC} ${WHITE}Select an option [0-9]:${NC} "
+        echo -e -n "  ${LIGHT_CYAN}❯${NC} ${WHITE}Select an option [0-10]:${NC} "
         read -r choice
 
         case $choice in
@@ -1054,6 +1084,7 @@ main_menu() {
             7) status_check ;;
             8) install_playit_cli ;;
             9) uninstall_mpanel ;;
+            10) install_java_images ;;
             0)
                 echo ""
                 echo -e "  ${GREEN}👋 Goodbye from Mpanel!${NC}"
@@ -1104,6 +1135,9 @@ case "$CMD" in
         ;;
     playit|playit-cli)
         install_playit_cli "$@"
+        ;;
+    java|java26|java-26)
+        install_java_images "$@"
         ;;
     uninstall)
         uninstall_mpanel "$@"

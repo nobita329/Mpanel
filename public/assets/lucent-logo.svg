@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="lucent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="45%" stop-color="#4f6ef7" />
+      <stop offset="100%" stop-color="#3b52d4" />
+    </linearGradient>
+    <linearGradient id="lucent-shine" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#7b81b2" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#4f6ef7" stop-opacity="0.1" />
+    </linearGradient>
+    <filter id="lucent-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Background Pill / Hex -->
+  <rect x="6" y="6" width="88" height="88" rx="26" fill="#13131c" stroke="url(#lucent-grad)" stroke-width="2.5" />
+  
+  <!-- Outer Glow Aura -->
+  <circle cx="50" cy="50" r="28" fill="#4f6ef7" opacity="0.18" filter="url(#lucent-glow)" />
+
+  <!-- Lucent Crystal Diamond Facets -->
+  <polygon points="50,18 78,44 50,82 22,44" fill="url(#lucent-grad)" />
+  <polygon points="50,18 78,44 50,52" fill="url(#lucent-shine)" opacity="0.85" />
+  <polygon points="50,18 22,44 50,52" fill="#ffffff" opacity="0.35" />
+  <polygon points="22,44 50,82 50,52" fill="#2b3ea0" opacity="0.9" />
+  <polygon points="78,44 50,82 50,52" fill="#3b52d4" opacity="0.75" />
+
+  <!-- Center Sparkle / Core Reflection -->
+  <circle cx="50" cy="46" r="3.5" fill="#ffffff" filter="url(#lucent-glow)" />
+  <circle cx="34" cy="30" r="1.5" fill="#38bdf8" opacity="0.8" />
+  <circle cx="66" cy="68" r="1.5" fill="#7b81b2" opacity="0.8" />
+</svg>
+

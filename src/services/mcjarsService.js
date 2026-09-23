@@ -80,6 +80,8 @@ class McJarsService {
         return 'ghcr.io/pterodactyl/yolks:java_8';
       }
     } else if (major >= 26) {
+      return 'ghcr.io/pterodactyl/yolks:java_26';
+    } else if (major >= 25) {
       return 'ghcr.io/pterodactyl/yolks:java_25';
     }
     return 'ghcr.io/pterodactyl/yolks:java_21';

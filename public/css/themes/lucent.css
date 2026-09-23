@@ -1,0 +1,192 @@
+/* ==========================================================================
+   LucentUI Theme ("Minimalist Glassy Hosting Theme by Zaqua")
+   Based on LucentUI v2.0.0
+   ========================================================================== */
+
+:root.theme-lucent, html.theme-lucent, .theme-lucent {
+  --primary: #4f6ef7;
+  --lucent-primary: #4f6ef7;
+  --lucent-primary-glow: rgba(79, 110, 247, 0.35);
+  --lucent-secondary: #7b81b2;
+  --lucent-bg: #13131c;
+  --lucent-bg-secondary: #181822;
+  --lucent-card: #181822;
+  --lucent-border: rgba(255, 255, 255, 0.08);
+  --font-sans: 'Figtree', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Base Body & Background */
+html.theme-lucent body {
+  background: radial-gradient(1100px 700px at 50% -10%, rgba(79, 110, 247, 0.14), transparent 65%),
+              radial-gradient(900px 600px at 90% 90%, rgba(123, 129, 178, 0.08), transparent 50%),
+              #13131c !important;
+  background-attachment: fixed !important;
+  color: #f8fafc;
+  font-family: var(--font-sans);
+}
+
+html.theme-lucent #overlay-layer {
+  background: rgba(19, 19, 28, 0.85);
+  backdrop-filter: blur(10px);
+}
+
+/* Glass Panels & Modals */
+html.theme-lucent .glass-panel {
+  background: rgba(24, 24, 34, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Glass Cards */
+html.theme-lucent .glass-card {
+  background: rgba(24, 24, 34, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(14px) !important;
+  border-radius: 1.1rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html.theme-lucent .glass-card:hover {
+  border-color: rgba(79, 110, 247, 0.45) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 25px rgba(79, 110, 247, 0.18) !important;
+}
+
+/* Lucent Primary Buttons */
+html.theme-lucent .btn-cyber,
+html.theme-lucent .btn-nook-start {
+  background: linear-gradient(135deg, #4f6ef7 0%, #3b52d4 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 0.85rem !important;
+  box-shadow: 0 4px 18px rgba(79, 110, 247, 0.35) !important;
+  transition: all 0.25s ease !important;
+}
+
+html.theme-lucent .btn-cyber:hover,
+html.theme-lucent .btn-nook-start:hover {
+  background: linear-gradient(135deg, #5b79ff 0%, #445ce8 100%) !important;
+  box-shadow: 0 8px 24px rgba(79, 110, 247, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+/* Glass Inputs */
+html.theme-lucent .glass-input {
+  background: rgba(14, 14, 22, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0.85rem !important;
+  color: #f8fafc !important;
+}
+
+html.theme-lucent .glass-input:focus {
+  border-color: #4f6ef7 !important;
+  box-shadow: 0 0 18px rgba(79, 110, 247, 0.25) !important;
+}
+
+/* Navigation: Topbar & Sidebar */
+html.theme-lucent .nook-sidebar {
+  background: rgba(19, 19, 28, 0.95) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+html.theme-lucent .nook-topbar {
+  background: rgba(19, 19, 28, 0.88) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+html.theme-lucent .nook-nav-item.active {
+  background: rgba(79, 110, 247, 0.14) !important;
+  border: 1px solid rgba(79, 110, 247, 0.35) !important;
+  color: #8da2fb !important;
+  border-radius: 0.85rem !important;
+  box-shadow: 0 0 15px rgba(79, 110, 247, 0.15) !important;
+}
+
+html.theme-lucent .nook-nav-item.active .nook-icon-box {
+  background: #4f6ef7 !important;
+  color: #ffffff !important;
+  border-radius: 0.6rem !important;
+}
+
+/* Lucent Server Card */
+html.theme-lucent .pterox-server-card {
+  background: rgba(24, 24, 34, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.15rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html.theme-lucent .pterox-server-card:hover {
+  border-color: rgba(79, 110, 247, 0.45) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 25px rgba(79, 110, 247, 0.2) !important;
+}
+
+html.theme-lucent .pterox-server-card-banner {
+  height: 105px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  position: relative !important;
+  padding: 0.85rem !important;
+}
+
+html.theme-lucent .pterox-server-card-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(19, 19, 28, 0.25) 0%, rgba(24, 24, 34, 0.95) 100%);
+}
+
+/* Accent Color Highlights */
+html.theme-lucent .text-cyan-400,
+html.theme-lucent .text-cyan-300 {
+  color: #8da2fb !important;
+}
+
+html.theme-lucent .bg-cyan-500\/10 {
+  background-color: rgba(79, 110, 247, 0.12) !important;
+}
+
+html.theme-lucent .bg-cyan-500\/20 {
+  background-color: rgba(79, 110, 247, 0.22) !important;
+}
+
+html.theme-lucent .border-cyan-500\/20,
+html.theme-lucent .border-cyan-500\/30,
+html.theme-lucent .border-cyan-500\/40,
+html.theme-lucent .border-cyan-500\/50 {
+  border-color: rgba(79, 110, 247, 0.35) !important;
+}
+
+/* Light Mode Overrides for LucentUI */
+html.theme-lucent.light body {
+  background: radial-gradient(1000px 600px at 50% -10%, rgba(79, 110, 247, 0.08), transparent 70%),
+              #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.theme-lucent.light .glass-panel {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+html.theme-lucent.light .glass-card {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.theme-lucent.light .glass-input {
+  background: rgba(241, 245, 249, 0.7) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+}
+

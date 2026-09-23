@@ -15,10 +15,11 @@ class VersionChanger {
     this.isInstalling = false;
 
     this.javaImages = [
+      { label: 'Java 26 (ghcr.io/pterodactyl/yolks:java_26)', value: 'ghcr.io/pterodactyl/yolks:java_26' },
+      { label: 'Java 25 (Next-Gen / Experimental)', value: 'ghcr.io/pterodactyl/yolks:java_25' },
       { label: 'Java 21 (Recommended for MC 1.20.5+ / 1.21.x)', value: 'ghcr.io/pterodactyl/yolks:java_21' },
       { label: 'Java 17 (Recommended for MC 1.18 - 1.20.4)', value: 'ghcr.io/pterodactyl/yolks:java_17' },
       { label: 'Java 8 (Recommended for MC 1.7.10 - 1.16.5)', value: 'ghcr.io/pterodactyl/yolks:java_8' },
-      { label: 'Java 25 (Next-Gen / Experimental)', value: 'ghcr.io/pterodactyl/yolks:java_25' },
       { label: 'Java 16 (Recommended for MC 1.17)', value: 'ghcr.io/pterodactyl/yolks:java_16' },
       { label: 'Java 11 (Legacy LTS)', value: 'ghcr.io/pterodactyl/yolks:java_11' }
     ];
@@ -531,6 +532,8 @@ class VersionChanger {
           targetJava = 'ghcr.io/pterodactyl/yolks:java_8';
         }
       } else if (major >= 26) {
+        targetJava = 'ghcr.io/pterodactyl/yolks:java_26';
+      } else if (major >= 25) {
         targetJava = 'ghcr.io/pterodactyl/yolks:java_25';
       }
     }
@@ -561,6 +564,7 @@ class VersionChanger {
    */
   formatJavaLabel(img) {
     if (!img) return 'Java 21';
+    if (img.includes('java_26')) return 'Java 26';
     if (img.includes('java_25')) return 'Java 25';
     if (img.includes('java_21')) return 'Java 21';
     if (img.includes('java_17')) return 'Java 17';

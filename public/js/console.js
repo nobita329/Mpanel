@@ -1623,6 +1623,7 @@ class ServerConsole {
     let dockerOptions = [];
     if (isMinecraft) {
       dockerOptions = [
+        { label: 'Java 26', value: 'ghcr.io/pterodactyl/yolks:java_26' },
         { label: 'Java 25', value: 'ghcr.io/pterodactyl/yolks:java_25' },
         { label: 'Java 21', value: 'ghcr.io/pterodactyl/yolks:java_21' },
         { label: 'Java 17', value: 'ghcr.io/pterodactyl/yolks:java_17' },

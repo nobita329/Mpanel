@@ -1,6 +1,7 @@
 // Mpanel Supported Docker Images & Templates
 module.exports = {
   minecraft: [
+    { label: "Java 26", value: "ghcr.io/pterodactyl/yolks:java_26", defaultCmd: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}} nogui", jarFile: "server.jar" },
     { label: "Java 25", value: "ghcr.io/pterodactyl/yolks:java_25", defaultCmd: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}} nogui", jarFile: "server.jar" },
     { label: "Java 21", value: "ghcr.io/pterodactyl/yolks:java_21", defaultCmd: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}} nogui", jarFile: "server.jar" },
     { label: "Java 17", value: "ghcr.io/pterodactyl/yolks:java_17", defaultCmd: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}} nogui", jarFile: "server.jar" },
