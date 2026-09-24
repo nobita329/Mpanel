@@ -281,6 +281,7 @@ bash menu.sh
 # 1. Clone the repository
 git clone https://github.com/nobita329/Mpanel.git
 cd Mpanel
+bash menu.sh
 
 # 2. Install dependencies
 npm install
