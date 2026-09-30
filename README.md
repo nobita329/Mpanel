@@ -25,7 +25,9 @@
 
 ### 1-Click Install
 ```bash
-bash <(curl -sSL https://raw.githubusercontent.com/nobita329/Mpanel/main/menu.sh)
+git clone https://github.com/nobita329/Mpanel.git
+cd Mpanel
+bash menu.sh
 ```
 
 ### Management Menu
@@ -44,39 +46,6 @@ bash <(curl -sSL https://raw.githubusercontent.com/nobita329/Mpanel/main/menu.sh
 | **Daemon API** | `3003` | REST & WebSocket API |
 | **SFTP Server** | `3004` | Built-in SFTP (`sftp://host:3004`) |
 | **Server DB (MySQL 8.4)** | `3005` | Game Servers Database |
-
----
-
-## 🗄️ Database Setup (Docker)
-
-### 1. Panel Database (MariaDB - Port 3002)
-```bash
-docker run -d \
-  --name mariadb \
-  -e MARIADB_ROOT_PASSWORD=Nova \
-  -e MARIADB_DATABASE=Nova \
-  -e MARIADB_USER=Nova \
-  -e MARIADB_PASSWORD=NovaStudio \
-  -p 3002:3306 \
-  -v mariadb_data:/var/lib/mysql \
-  --restart unless-stopped \
-  mariadb:latest
-```
-
-### 2. Game Server Database (MySQL 8.4 - Port 3005)
-```bash
-docker run -d \
-  --name mysql \
-  -e MYSQL_ROOT_PASSWORD=YourStrongPassword \
-  -e MYSQL_DATABASE=mydatabase \
-  -e MYSQL_USER=myuser \
-  -e MYSQL_PASSWORD=YourUserPassword \
-  -p 3005:3306 \
-  -p 3306:3306 \
-  -v mysql_data:/var/lib/mysql \
-  --restart unless-stopped \
-  mysql:8.4
-```
 
 ---
 
