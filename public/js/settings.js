@@ -1258,7 +1258,7 @@ class SettingsManager {
               <div id="preview-sample-card" class="glass-card p-5 rounded-2xl border border-white/15 space-y-4">
                 <div class="flex items-center gap-3">
                   <div id="preview-logo-box" class="w-10 h-10 rounded-xl bg-slate-900/80 p-1 border border-cyan-500/40 flex items-center justify-center">
-                    <img id="preview-logo-img" src="/assets/mpanel-logo.svg" alt="Preview Logo" class="w-full h-full object-contain">
+                    <img id="preview-logo-img" src="/assets/logo.png" alt="Preview Logo" class="w-full h-full object-contain">
                   </div>
                   <div>
                     <h4 id="preview-panel-title" class="text-sm font-bold text-white">Mpanel</h4>

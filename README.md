@@ -1,34 +1,47 @@
 <!-- ============================================================================== -->
-<!--                     🎮 MPANEL v2.5.2 - NEXT-GEN GAME & APP PANEL               -->
+<!--                     🎮 MPANEL v2.5.4 - NEXT-GEN GAME & APP PANEL               -->
 <!-- ============================================================================== -->
 
 <p align="center">
   <a href="https://nobitahost.in">
-    <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=2,6,11,16,21&height=220&section=header&text=🎮%20MPANEL%20v2.5.2&fontSize=42&fontAlignY=36&desc=High-Performance%20Game%20%26%20App%20Server%20Web%20Management%20Engine%20for%20Node.js&descAlignY=58&descSize=18&animation=twinkling" width="100%" alt="Mpanel Header Banner" />
+    <img src="public/assets/banner.png" width="100%" alt="Nova Studio - Mpanel Banner" style="border-radius: 14px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.85); border: 1px solid rgba(34, 211, 238, 0.3);" />
   </a>
 </p>
 
 <p align="center">
   <a href="https://nobitahost.in">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=20&pause=1000&color=22D3EE&center=true&vCenter=true&random=false&width=750&lines=⚡+Modern+Node.js+Alternative+to+Pterodactyl;🚀+Real-Time+xterm.js+Console+%26+Live+Meters;🔄+Automated+GitHub+Releases+Detector+%26+Live+Update+Terminal;🎮+Minecraft+Player+Manager+%26+Universal+Addon+Marketplace;🔒+Embedded+SFTP+(Port+3004)+%26+MariaDB+(Port+27017);🎨+Multi-Theme+Personalization%3A+Full+Black+OLED%2C+PteroX+V2%2C+LiquidX" alt="Typing Animation" />
+    <img src="public/assets/logo.png" width="160px" alt="Mpanel Brand Logo" style="border-radius: 24px; box-shadow: 0 0 50px rgba(168, 85, 247, 0.45); border: 2px solid rgba(234, 179, 8, 0.4);" />
+  </a>
+</p>
+
+<h1 align="center">🎮 MPANEL v2.5.4</h1>
+<p align="center">
+  <b>High-Performance Game &amp; Application Server Web Management Engine for Node.js</b><br/>
+  <i>Engineered with Glassmorphism UI, Multi-Database Architecture, Embedded SFTP &amp; Real-Time Telemetry</i>
+</p>
+
+<p align="center">
+  <a href="https://nobitahost.in">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=20&pause=1000&color=22D3EE&center=true&vCenter=true&random=false&width=750&lines=⚡+Modern+Node.js+Alternative+to+Pterodactyl;🚀+Real-Time+xterm.js+Console+%26+Live+Meters;🔄+Automated+GitHub+Releases+Detector+%26+Live+Update+Terminal;🎮+Minecraft+Player+Manager+%26+Universal+Addon+Marketplace;🔒+Dual+Database%3A+MariaDB+(3002)+%26+MySQL+8.4+(3005);🎨+Multi-Theme+Personalization%3A+Full+Black+OLED%2C+PteroX+V2%2C+LiquidX" alt="Typing Animation" />
   </a>
 </p>
 
 <p align="center">
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-18.0%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" /></a>
-  <a href="https://github.com/nobita329/Mpanel/releases/tag/v2.5.2"><img src="https://img.shields.io/badge/Release-v2.5.2-8A2BE2?style=for-the-badge&logo=github&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/nobita329/Mpanel/releases/tag/v2.5.4"><img src="https://img.shields.io/badge/Release-v2.5.4-8A2BE2?style=for-the-badge&logo=github&logoColor=white" alt="Version" /></a>
   <a href="https://nobitahost.in"><img src="https://img.shields.io/badge/Website-nobitahost.in-007ACC?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" /></a>
-  <a href="#-system-updates--live-terminal-engine"><img src="https://img.shields.io/badge/Auto--Updater-Live%20Terminal-00C7B7?style=for-the-badge&logo=terminal&logoColor=white" alt="Auto Updater" /></a>
+  <a href="#-architecture--port-matrix"><img src="https://img.shields.io/badge/Ports-3001%20|%203002%20|%203003%20|%203004%20|%203005-00C7B7?style=for-the-badge&logo=server&logoColor=white" alt="Ports" /></a>
   <a href="#-theme--customization-engine"><img src="https://img.shields.io/badge/Theme-Full%20Black%20OLED-111525?style=for-the-badge&logo=styled-components&logoColor=white" alt="Theme" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-F7DF1E?style=for-the-badge&logo=open-source-initiative&logoColor=black" alt="License" /></a>
 </p>
 
 <p align="center">
   <a href="#-quick-start"><b>🚀 Quick Start</b></a> •
-  <a href="#-what-is-new-in-v252"><b>✨ What's New</b></a> •
+  <a href="#-what-is-new-in-v254"><b>✨ What's New</b></a> •
+  <a href="#-database-configuration--docker-quickstart"><b>🗄️ Databases</b></a> •
+  <a href="#-architecture--port-matrix"><b>🔒 Ports</b></a> •
   <a href="#-core-features--capabilities"><b>🧩 Features</b></a> •
   <a href="#-theme--customization-engine"><b>🎨 Themes</b></a> •
-  <a href="#-architecture--port-matrix"><b>🔒 Ports</b></a> •
   <a href="#-directory-structure"><b>📁 Structure</b></a> •
   <a href="https://nobitahost.in"><b>🌐 Cloud Hosting</b></a>
 </p>
@@ -47,7 +60,7 @@
 
 ```mermaid
 graph TD
-    Client["🌐 Client Browser (Admins & Users)"] -->|Port 3001: Web UI & xterm.js WebSocket| Gateway["🚀 Mpanel Engine (Port 3001)"]
+    Client["🌐 Client Browser (Admins & Users)"] -->|Port 3001: Web UI & xterm.js WebSocket| Gateway["🚀 Mpanel Web Engine (Port 3001)"]
     External["⚡ External Integrations / Discord Bots"] -->|Port 3003: REST & WS API| GatewayAPI["🔌 Daemon API (Port 3003)"]
     FTPClient["📁 FileZilla / WinSCP / Cyberduck"] -->|Port 3004: SSH SFTP| SFTP["🛡️ Embedded SFTP Server (Port 3004)"]
 
@@ -55,7 +68,8 @@ graph TD
     GatewayAPI --> EngineCore
 
     EngineCore -->|Container Lifecycle| Docker["🐳 Docker Engine (Java 8-25, Node, Python)"]
-    EngineCore -->|Database Storage| MariaDB["🗄️ MariaDB / MySQL 11 (Port 27017)"]
+    EngineCore -->|Panel Database Storage| MariaDB["🗄️ Panel MariaDB (Port 3002)"]
+    EngineCore -->|Server Database Storage| MySQLServer["🗄️ Server MySQL 8.4 (Port 3005)"]
     EngineCore -->|Live Output Stream| WSConsole["📟 WebSocket Console Engine"]
     EngineCore -->|Release Pipeline| AutoUpdater["🔄 GitHub Releases Auto-Detect & Live Terminal"]
 
@@ -63,6 +77,7 @@ graph TD
     style GatewayAPI fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
     style SFTP fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff
     style MariaDB fill:#701a75,stroke:#f472b6,stroke-width:2px,color:#fff
+    style MySQLServer fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#fff
     style AutoUpdater fill:#083344,stroke:#22d3ee,stroke-width:2px,color:#fff
 ```
 
@@ -73,50 +88,99 @@ graph TD
 | Service | Port | Protocol | Encryption | Description |
 | :--- | :---: | :---: | :---: | :--- |
 | **Web Panel UI** | `3001` | HTTP / WS | TLS / SSL | Main Web Dashboard & Live Console WebSocket |
+| **Panel MariaDB Engine** | `3002` | TCP | Native Auth | Dedicated Panel Database (Docker: `mariadb:latest`) |
 | **Panel & Daemon API** | `3003` | HTTP / WS | Bearer JWT | REST & WS API for external bots, billing & WHMCS |
 | **Embedded SFTP Server** | `3004` | SFTP | SSH2 RSA/ECDSA | Built-in high-speed file transfer (`sftp://host:3004`) |
-| **Dedicated MariaDB Engine**| `27017`| TCP | Native Auth | Relational database server for Minecraft plugins & app databases |
+| **Server Game DB (MySQL 8.4)**| `3005` / `3306`| TCP | Native Auth | Dedicated Game Server Database (Docker: `mysql:8.4`) |
 
 ---
 
-## ✨ What is New in v2.5.2
+## 🗄️ Database Configuration & Docker Quickstart
 
-<p align="center">
-  <img src="public/assets/console-preview.png" alt="Mpanel v2.5.2 Console & Live Parsentbar Telemetry Preview" style="border-radius: 14px; border: 1px solid rgba(34, 211, 238, 0.25); box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);" width="100%" />
-</p>
+Mpanel uses an enterprise-grade multi-database architecture dividing Panel internal state and Game Server database services:
 
-### 1. 🟢 Real-Time 5-State Server Lifecycle Engine
-- **5 High-Accuracy Real-Time Statuses**:
-  - 🟢 **Online / Started**: Server process running, ports active, telemetry streaming.
-  - 🔴 **Offline / Stopped**: Process terminated, zero resource consumption.
-  - 🟡 **Restarting**: Graceful reload sequence in progress.
-  - 🔵 **Starting**: Process booting, initializing JVM/Node/Python runtime.
-  - ⚫ **Stopping**: Graceful shutdown and file lock flushing in progress.
-- **Optimistic Power Control & Status Synchronization**: Immediate UI badge update and button state locking upon clicking **Start**, **Stop**, **Restart**, or **Kill** to eliminate latency perception and prevent duplicated socket requests.
-- **Dual-Source Status Resolution**: Combines real-time Docker container inspection with active process metrics for 100% accurate status reporting.
+### 1. Panel Database (MariaDB - Port 3002)
+Runs the internal Panel authentication, server records, users, and telemetry data:
+```bash
+# ================== Panel DB Only =========================
+docker run -d \
+  --name mariadb \
+  -e MARIADB_ROOT_PASSWORD=Nova \
+  -e MARIADB_DATABASE=Nova \
+  -e MARIADB_USER=Nova \
+  -e MARIADB_PASSWORD=NovaStudio \
+  -p 3002:3306 \
+  -v mariadb_data:/var/lib/mysql \
+  --restart unless-stopped \
+  mariadb:latest
+```
 
-### 2. 📊 Glowing Telemetry Cards & Horizontal Parsentbars
-- **Horizontal Smooth Percent Progress Bars (`.parsentbar`)**: High-contrast visual capacity bars showing real-time utilization beneath every metric.
-- **Individual Glow Accents**:
-  - ⚡ **CPU**: Cyan accent (`#06b6d4`) with percentage load indicator.
-  - 🧠 **Memory**: Purple accent (`#a855f7`) with live dual readout (e.g., `512 MB / 2048 MB`).
-  - 💾 **Disk**: Amber accent (`#f59e0b`) with capacity tracking.
-  - 📥 **Inbound Network**: Emerald accent (`#10b981`) showing real-time download bandwidth.
-  - 📤 **Outbound Network**: Rose accent (`#f43f5e`) showing real-time upload bandwidth.
-- **Dual Metric Readout**: Displays both percentage progress bar and raw human-readable numbers (MB, GB, KB/s) side-by-side.
+### 2. Game Server Database (MySQL 8.4 - Port 3005 & 3306)
+Runs user databases for Minecraft plugins (LuckPerms, CoreProtect), Discord bots, and game databases:
+```bash
+# =================== Server DB Only ==========================
+docker run -d \
+  --name mysql \
+  -e MYSQL_ROOT_PASSWORD=YourStrongPassword \
+  -e MYSQL_DATABASE=mydatabase \
+  -e MYSQL_USER=myuser \
+  -e MYSQL_PASSWORD=YourUserPassword \
+  -p 3005:3306 \
+  -p 3306:3306 \
+  -v mysql_data:/var/lib/mysql \
+  --restart unless-stopped \
+  mysql:8.4
+```
 
-### 3. 🧭 Optimized Address & State-Reactive Uptime Grid
-- **Adaptive `1.65fr : 1fr` Responsive Split**: Balanced layout prevents IP address, port, and subdomain truncation on standard and wide monitors.
-- **1-Click Address Copy**: Integrated `data-addr` click-to-copy with instant visual copied checkmark feedback.
-- **Reactive Uptime Pill**: Vibrantly pulses emerald when the server is online; seamlessly transitions to a muted slate pill when offline or stopped.
+### 3. Environment Configuration (`.env`)
+```env
+# Application Settings
+PANEL_NAME=Mpanel
+PORT=3001
+API_PORT=3003
+SFTP_PORT=3004
+JWT_SECRET=your_super_secret_jwt_key_here
 
-### 4. 🛡️ Admin-Only Server Deletion Security Hardening
-- **Strict Backend Route Protection**: `DELETE /api/servers/:id` strictly validates `req.user.role === 'admin'`, returning `403 Forbidden` if a standard user attempts deletion.
-- **Zero Accidental Deletions**: Standard users cannot delete instances.
-- **Console Settings Tab Lockout**: The red "Delete Server" button in the Console Danger Zone is automatically hidden for regular users and replaced with an **"Admin Only"** locked badge.
+# Panel MariaDB Configuration
+DB_HOST=127.0.0.1
+DB_PORT=3002
+DB_USER=panel
+DB_PASSWORD=PanelPass123!
+DB_NAME=panel
 
-### 5. 💻 Modernized `menu.sh` Management Interface
-- **Official ASCII Banner**: Striking cyberpunk ASCII art header upon launching `./menu.sh`:
+# Server Database Configuration (MySQL 8.4)
+SERVER_DB_HOST=127.0.0.1
+SERVER_DB_PORT=3005
+SERVER_DB_USER=root
+SERVER_DB_PASSWORD=YourStrongPassword
+SERVER_DB_DATABASE=mydatabase
+```
+
+---
+
+## ✨ What is New in v2.5.4
+
+### 1. 🌟 Official Brand Identity: 3D Gold/Purple Logo & Arcade Banner
+- **Futuristic 3D Metallic Mpanel Logo**: High-definition gold-accented cyber emblem with glowing purple neon rings and server towers (`public/assets/logo.png`).
+- **Retro-Futuristic Nova Studio CRT Arcade Banner**: Cyberpunk scanline arcade visual with glowing blue neon text (`public/assets/banner.png`).
+- Seamlessly integrated across Web Header, Login Modals, Dynamic Favicons, Theme Switchers, and Settings previews.
+
+### 2. 🔔 Neon Glassmorphic Notification & Modal UI Engine
+- **Custom `app.prompt(...)` Modal Dialogs**: Completely eliminated all 18 native browser `prompt(...)` popups throughout:
+  - Sandboxed File Manager (New File, New Folder, Rename, Archive Extraction).
+  - Web Console (Send Command, Fast Actions).
+  - Config Editor (Variable Modifiers, Property Overrides).
+  - World Manager (Dimension Creation, World Imports).
+  - Server Importer & Migration Suite.
+  - Admin Settings & Node Manager.
+- **Glassmorphic Confirm (`app.confirm`) & Toast System**: Rich floating notifications with auto-dismiss countdowns, success/warning/error glows, and fluid micro-animations.
+
+### 3. 🗄️ Multi-Engine Dual Database Architecture
+- Native separation between internal Panel MariaDB (`Port 3002`) and external Game Server MySQL 8.4 (`Port 3005`).
+- Preconfigured Docker deployment one-liners with persistence volumes and restart policies.
+
+### 4. 💻 Modernized `menu.sh` Management Interface
+- **Cyberpunk ASCII Art Header**:
   ```
   ███╗   ███╗██████╗  █████╗ ███╗   ██╗███████╗██╗     
   ████╗ ████║██╔══██╗██╔══██╗████╗  ██║██╔════╝██║     
@@ -125,61 +189,11 @@ graph TD
   ██║ ╚═╝ ██║██║     ██║  ██║██║ ╚████║███████╗███████╗
   ╚═╝     ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝
   ```
-- **Live System Telemetry Dashboard**: Real-time display of Public IP, Local Network IP, Active Port Matrix (`3001`, `3003`, `3004`, `27017`), and PM2 Daemon status (`ONLINE` / `STOPPED`).
-- **Structured Modular Menus**: Main Menu, PM2 Process Suite, and Database Management menus with intuitive numeric selection.
+- **Real-Time Telemetry Matrix**: Live display of Public IP, LAN IP, Ports (`3001`, `3002`, `3003`, `3004`, `3005`), and PM2 Daemon state.
+- **1-Click Menu Database Provisioning**: Dedicated submenu to deploy MariaDB and MySQL containers instantly.
 
-### 6. 🌐 Standalone Server Instance Deployment Portal (`deploy.php`)
-- **Dedicated Deployment Portal**: Modern web interface (`deploy.php` & `public/deploy.php`) for selecting server configurations, runtime types, hardware specs, and billing cycles with instant provisioning.
-
-### 7. 🖥️ VM - KVM / No-KVM Virtualization Architecture
-- Clean branding upgrade replacing legacy LumenVM with transparent **VM - KVM** (hardware-assisted kernel virtualization) and **No-KVM** (lightweight isolated containerization) presets across the server wizard and management console.
-
----
-
-## ✨ What is New in v2.5.0
-
-### 1. 🔄 System Updates & Auto-Detection Engine
-- **GitHub Releases Auto-Detection**: Real-time checking against [nobita329/Mpanel/releases](https://github.com/nobita329/Mpanel/releases) with semver comparison.
-- **Dedicated Updates Dashboard (`#admin-updates`)**:
-  - Displays Installed Version vs Latest Release tag.
-  - Formatted Markdown Changelog reader and Release History accordion.
-  - Instant **"Check for Updates"** manual refresh button.
-- **Interactive Live Update Terminal ("live update tarmil")**:
-  - Full-featured embedded `xterm.js` terminal with cyber styling, auto-scrolling, clear screen, and log copying.
-  - Streams update execution line-by-line in real-time over WebSocket (`/ws/admin/updates`).
-  - **6-Step Pipeline Visualizer**: Pre-flight Verification ➔ Git Sync ➔ Dependencies (npm install) ➔ Database Migration ➔ PM2 Reload ➔ Health Verification.
-  - Action buttons: "Start System Update (Full Auto)", "Sync Dependencies & Schema", "Check Git Status".
-- **Global System Overview Integration (`#admin-overview`)**:
-  - Titlebar Version Pill (`v2.5.0`) & dynamic Update Status Pill (`Up-to-Date` or `Update Available`).
-  - High-visibility **Mpanel Release & Update Status Banner** with 1-click update actions.
-  - Sidebar navigation notification badge (`UPDATE`).
-
-### 2. 🎓 Interactive Auto Tutorials Engine (No Static Pages)
-- **Auto-Guided Spotlight Tours (`public/js/autoTutorial.js`)**:
-  - Focused backdrop lighting with pulsing highlight rings around active UI controls.
-  - 7-second countdown auto-progression bar, pause/resume, audio chimes, and keyboard navigation (`Esc`, arrow keys, `Space`).
-  - Includes **Client Portal Tour (`panel-tour`)** and **Server Console Tour (`server-tour`)**.
-- **Live Configuration Simulators (`public/js/knowledge.js`)**:
-  - **SFTP URI Generator**: Instant connection strings and commands for FileZilla & Cyberduck on Port `3004`.
-  - **Minecraft Aikar GC RAM Calculator**: Interactive slider (1GB–64GB) calculating heap and GC flags dynamically.
-  - **MariaDB Configuration YAML Generator**: Dynamic database config snippet generator for Port `27017`.
-- **Admin ON/OFF Controls**:
-  - Toggle Tutorials portal visibility in Admin Settings.
-  - Toggle automatic first-login tour for new users with an instant admin "Test Tour" button.
-- **Pure Naming**: Zero references to "Knowledge Base" across all user-facing UI, database settings, and modals.
-
-### 3. 🎨 PteroX V2.0.2 Theme Suite
-- **Complete Visual Assets**: High-resolution branding logos, status illustrations, and server card banners.
-- **Theme Palette & Layouts**: Deep space dark mode (`#111525`), primary cyan (`#23aeea`), and accent orange (`#ff5108`).
-
-### 4. 🛠️ McTools Blueprint Extension Suite
-- **Integrated Extension**: Directly ported from [`nobita329/Nobita-Cloud (mctools.blueprint)`](https://github.com/nobita329/Nobita-Cloud/blob/main/thame/Extension/mctools.blueprint).
-- **Live MOTD & Colored Text Builder**: Real-time Minecraft colored text builder (Sign, Book, Chat, MOTD) with live dark preview box and instant copy in Legacy (`&`), Section (`§`), Tellraw/JSON, and MiniMessage.
-- **Color Palette & Swatches**: Official 16 Minecraft colors with hex codes, RGB picker, and Bungee hex formatting (`&x&r&r&g&g&b&b`).
-- **SmallCaps & Unicode Decorative Fonts**: Real-time styler for SmallCaps, BigCaps, Bubble, Fraktur, FullWidth, Script, and Tiny fonts.
-- **1,200+ Minecraft Registry Directory**: Fast searchable registry of 1,228 Items & Blocks, 149 Entities, 113 Particles, 1,651 Game Sounds, 42 Enchantments, and 40 Effects with 1-click `/give`, `/summon`, and `/particle` copy.
-- **Inventory Slot Maps & Emojis**: Interactive slot indices for Chests, Hoppers, Furnaces, and Brewing Stands, plus 1,900+ Minecraft symbols.
-- **1-Click Download**: Download `mctools.blueprint` directly from the Addon Marketplace.
+### 5. 🚀 Automated GitHub Release & Tag CI/CD (`.github/workflows/release.yml`)
+- Automated build, version tag generation, and GitHub release notes publishing on every repository push to `main`.
 
 ---
 
@@ -248,6 +262,7 @@ graph TD
 
 ### 1. ⚡ 1-Click Universal Auto Install (`menu.sh`)
 Run the full automated installer directly from the web or locally:
+
 ```bash
 # Instant One-Liner from GitHub
 bash <(curl -sSL https://raw.githubusercontent.com/nobita329/Mpanel/main/menu.sh)
@@ -272,7 +287,7 @@ bash menu.sh
 | `./menu.sh usercreate` | Create new administrator or standard customer user |
 | `./menu.sh pm2` | PM2 Process Management menu (Start, Stop, Restart, Logs, Autostart) |
 | `./menu.sh db` | Database Suite (MariaDB/MySQL Docker engine & Migrations) |
-| `./menu.sh status` | Check port listening status (`3001`, `3003`, `3004`, `27017`) and database |
+| `./menu.sh status` | Check port listening status (`3001`, `3002`, `3003`, `3004`, `3005`) and database |
 | `./menu.sh playit` | Install native Playit.gg zero-port tunnel CLI |
 | `./menu.sh uninstall`| Safely remove or clean Mpanel deployment |
 
@@ -309,12 +324,13 @@ npm run pm2:logs
 │   ├── servers/             # Sandboxed server directories (server1, server2, ...)
 │   └── backups/             # Server snapshot .zip archives
 ├── public/
+│   ├── assets/              # Brand assets: logo.png, banner.png, console preview
 │   ├── index.html           # Main SPA HTML structure
 │   ├── deploy.php           # Public server deployment portal
 │   ├── css/
 │   │   └── style.css        # Multi-theme palettes & glassmorphic styling
 │   └── js/
-│       ├── app.js           # Core router, auth UI & toast notifications
+│       ├── app.js           # Core router, auth UI, app.prompt & toast notifications
 │       ├── updates.js       # Auto-detect updates engine & live xterm.js terminal
 │       ├── autoTutorial.js  # Spotlight guided walkthrough engine
 │       ├── knowledge.js     # Tutorials Hub & live configuration generators

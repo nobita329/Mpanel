@@ -1235,8 +1235,8 @@ class App {
       }
     } else {
       document.documentElement.classList.add('theme-nook');
-      if (logoEl && (!s.panel_logo || s.panel_logo === '/arix/Arix.png' || s.panel_logo === '/assets/liquidx-logo.svg' || s.panel_logo === '/images/pterox-header-logo.webp')) {
-        logoEl.src = '/assets/mpanel-logo.svg';
+      if (logoEl && (!s.panel_logo || s.panel_logo === '/assets/mpanel-logo.svg' || s.panel_logo === '/arix/Arix.png' || s.panel_logo === '/assets/liquidx-logo.svg' || s.panel_logo === '/images/pterox-header-logo.webp')) {
+        logoEl.src = '/assets/logo.png';
       }
       if (subNameEl && (subNameEl.innerText.includes('Theme') || subNameEl.innerText.includes('PteroX'))) {
         subNameEl.innerText = 'Mpanel Server Engine';

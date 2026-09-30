@@ -153,8 +153,8 @@ router.post('/reset', authenticate, requireAdmin, async (req, res) => {
       theme_mode: 'dark',
       panel_name: config.DEFAULT_PANEL_NAME || 'Mpanel',
       favicon_name: config.DEFAULT_PANEL_NAME || 'Mpanel',
-      panel_logo: dt.logo || '/assets/mpanel-logo.svg',
-      favicon_logo: dt.favicon || '/assets/favicon.svg'
+      panel_logo: dt.logo || '/assets/logo.png',
+      favicon_logo: dt.favicon || '/images/meta/Logo.png'
     };
 
     for (const [key, value] of Object.entries(defaults)) {
