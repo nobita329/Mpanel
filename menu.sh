@@ -250,7 +250,8 @@ auto_install_mpanel() {
         fi
     fi
     echo -e "${GREEN}✅ PM2 detected: $(pm2 -v 2>/dev/null)${NC}"
-
+    git clone https://github.com/nobita329/Mpanel.git
+    cd Mpanel
     # --- Step 4: NPM Dependencies ---
     echo ""
     echo -e "${BLUE}[4/6]${NC} 📦 Installing Node.js dependencies (npm install)...${NC}"
