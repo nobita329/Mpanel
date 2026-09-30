@@ -20,15 +20,22 @@ module.exports = {
   BACKUPS_DIR: path.resolve(__dirname, '../../mpanel/backups'),
   UPLOADS_DIR: path.resolve(__dirname, '../../public/uploads'),
 
-  // Database Configuration (MariaDB / MySQL)
+  // Database Configuration (Panel DB - MariaDB)
   DB_HOST: process.env.DB_HOST || '127.0.0.1',
-  DB_PORT: parseInt(process.env.DB_PORT || '27017', 10),
+  DB_PORT: parseInt(process.env.DB_PORT || '3002', 10),
   DB_USER: process.env.DB_USER || 'panel',
   DB_PASSWORD: process.env.DB_PASSWORD || 'PanelPass123!',
   DB_NAME: process.env.DB_NAME || 'panel',
 
+  // Server Database Configuration (Game Servers DB - MySQL 8.4)
+  SERVER_DB_HOST: process.env.SERVER_DB_HOST || '127.0.0.1',
+  SERVER_DB_PORT: parseInt(process.env.SERVER_DB_PORT || '3005', 10),
+  SERVER_DB_USER: process.env.SERVER_DB_USER || 'root',
+  SERVER_DB_PASSWORD: process.env.SERVER_DB_PASSWORD || 'YourStrongPassword',
+  SERVER_DB_DATABASE: process.env.SERVER_DB_DATABASE || 'mydatabase',
+
   // Panel Defaults
-  DEFAULT_PANEL_NAME: 'Mpanel',
+  DEFAULT_PANEL_NAME: process.env.PANEL_NAME || 'Mpanel',
   DEFAULT_THEME: {
     transparency: 18, // 0 - 100%
     blur: 16,        // 0 - 40px

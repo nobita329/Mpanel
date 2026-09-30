@@ -403,6 +403,69 @@ async function initDatabase() {
     await pool.query('ALTER TABLE users ADD COLUMN server_order TEXT DEFAULT NULL');
   } catch (e) {}
 
+  // Pterodactyl-aligned user status and profile fields
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN name_first VARCHAR(100) DEFAULT NULL');
+  } catch (e) {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN name_last VARCHAR(100) DEFAULT NULL');
+  } catch (e) {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN banned TINYINT(1) DEFAULT 0');
+  } catch (e) {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN suspended_until DATETIME DEFAULT NULL');
+  } catch (e) {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN suspension_reason TEXT DEFAULT NULL');
+  } catch (e) {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN last_login_at DATETIME DEFAULT NULL');
+  } catch (e) {}
+  try {
+    await pool.query('ALTER TABLE users ADD COLUMN last_login_ip VARCHAR(64) DEFAULT NULL');
+  } catch (e) {}
+
+  // Node Firewall Rules table (nftables manager)
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS node_firewall_rules (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        node_id INT NOT NULL,
+        port INT NOT NULL,
+        protocol VARCHAR(10) DEFAULT 'tcp',
+        action VARCHAR(20) DEFAULT 'allow',
+        target_ip VARCHAR(64) DEFAULT 'any',
+        description VARCHAR(191),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_fw_node (node_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+  } catch (e) {}
+
+  // Seed default Admin Settings (from settings.zip: basic & advanced)
+  try {
+    const adminDefaults = [
+      { key: 'company_name', value: 'Mpanel', type: 'string', desc: 'Panel company/organization name' },
+      { key: 'two_factor_requirement', value: '0', type: 'string', desc: 'Require 2FA: 0=Not Required, 1=Admin Only, 2=All Users' },
+      { key: 'default_language', value: 'en', type: 'string', desc: 'Default UI language' },
+      { key: 'admin_theme', value: 'default', type: 'string', desc: 'Admin theme: default or hyperv1' },
+      { key: 'recaptcha_enabled', value: 'false', type: 'boolean', desc: 'Enable reCAPTCHA on logins' },
+      { key: 'recaptcha_site_key', value: '', type: 'string', desc: 'reCAPTCHA Site Key' },
+      { key: 'recaptcha_secret_key', value: '', type: 'string', desc: 'reCAPTCHA Secret Key' },
+      { key: 'http_connect_timeout', value: '30', type: 'number', desc: 'HTTP connect timeout in seconds' },
+      { key: 'http_request_timeout', value: '60', type: 'number', desc: 'HTTP request timeout in seconds' },
+      { key: 'auto_allocation_enabled', value: 'true', type: 'boolean', desc: 'Automatic allocation creation for users' }
+    ];
+
+    for (const item of adminDefaults) {
+      const exists = await query.get('SELECT `key` FROM settings WHERE `key` = ?', [item.key]);
+      if (!exists) {
+        await query.run('INSERT INTO settings (`key`, `value`, `type`, `description`) VALUES (?, ?, ?, ?)', [item.key, item.value, item.type, item.desc]);
+      }
+    }
+  } catch (e) {}
+
   console.log('✅ MariaDB Schema initialized successfully.');
 }
 

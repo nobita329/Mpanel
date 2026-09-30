@@ -203,8 +203,18 @@ class ServerImporter {
   }
 
   async handleSaveProfile() {
-    const name = prompt('Enter a name for this connection profile:');
-    if (!name) return;
+    const name = await app.prompt({
+      tag: 'IMPORT PROFILE',
+      tagIcon: 'server',
+      title: 'Save Profile',
+      message: 'Enter a name for this connection profile:',
+      placeholder: 'e.g. Remote VPS SFTP',
+      defaultValue: '',
+      confirmText: 'Save Profile',
+      confirmIcon: 'check',
+      type: 'info'
+    });
+    if (!name || !name.trim()) return;
 
     const host = document.getElementById('imp-host').value.trim();
     const port = document.getElementById('imp-port').value;
@@ -276,8 +286,20 @@ class ServerImporter {
       payload = { ...payload, archiveUrl };
     }
 
-    if (wipeTarget && !confirm('WARNING: Wiping destination directory will delete all existing files on this server. Continue?')) {
-      return;
+    if (wipeTarget) {
+      const ok = await app.confirm({
+        tag: 'WIPE DESTINATION',
+        tagIcon: 'alert-triangle',
+        title: 'Wipe Server Directory',
+        badge: window.location.host,
+        message: 'WARNING: Wiping destination directory will delete all existing files on this server.',
+        subtext: 'Are you sure you want to completely erase the current server contents before importing?',
+        icon: 'trash-2',
+        confirmIcon: 'trash-2',
+        confirmText: 'Wipe & Import',
+        type: 'danger'
+      });
+      if (!ok) return;
     }
 
     try {

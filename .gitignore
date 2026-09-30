@@ -15,6 +15,7 @@ data/*.sqlite
 data/*.sqlite-journal
 data/*.sqlite-wal
 data/*.sqlite-shm
+data/*.sql
 !data/.gitkeep
 
 # Sandboxed Server Directories & Backups
@@ -41,3 +42,4 @@ logs/
 Thumbs.db
 .vscode/
 .idea/
+scratch/

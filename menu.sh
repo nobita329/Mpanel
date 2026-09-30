@@ -111,10 +111,11 @@ show_banner() {
     echo -e "${NC}"
     echo -e "  ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "  ${WHITE}${BOLD}🎮 MPANEL ${version}${NC} ${GRAY}•${NC} ${CYAN}Next-Gen Game & App Management Suite${NC}"
-    echo -e "  ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "  ${GRAY}│${NC} ${WHITE}Web Panel UI:${NC}    ${LIGHT_GREEN}http://${host_ip}:3001${NC}"
     echo -e "  ${GRAY}│${NC} ${WHITE}Daemon API:${NC}      ${LIGHT_GREEN}http://${host_ip}:3003${NC}"
     echo -e "  ${GRAY}│${NC} ${WHITE}SFTP Server:${NC}     ${LIGHT_GREEN}sftp://${host_ip}:3004${NC}"
+    echo -e "  ${GRAY}│${NC} ${WHITE}Panel DB:${NC}        ${LIGHT_GREEN}mariadb (Port 3002)${NC}"
+    echo -e "  ${GRAY}│${NC} ${WHITE}Server DB:${NC}       ${LIGHT_GREEN}mysql 8.4 (Port 3005)${NC}"
     echo -e "  ${GRAY}│${NC} ${WHITE}Daemon Status:${NC}   ${pm2_status}"
     echo -e "  ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
@@ -565,7 +566,7 @@ update_db_env() {
 
 start_mariadb_container() {
     echo -e "${CYAN}======================================================${NC}"
-    echo -e "${WHITE}  🚀 Launching MariaDB 11 Container (Port 27017)      ${NC}"
+    echo -e "${WHITE}  🚀 Launching MariaDB Container (Port 3002) [Panel DB] ${NC}"
     echo -e "${CYAN}======================================================${NC}"
     echo ""
 
@@ -575,32 +576,41 @@ start_mariadb_container() {
         return 1
     fi
 
-    if docker ps --format '{{.Names}}' | grep -q "^panel-mariadb$"; then
-        echo -e "${GREEN}✅ Container 'panel-mariadb' is already running on port 27017.${NC}"
-    elif docker ps -a --format '{{.Names}}' | grep -q "^panel-mariadb$"; then
-        echo -e "${YELLOW}Container 'panel-mariadb' exists but is stopped. Starting...${NC}"
-        docker start panel-mariadb
+    if docker ps --format '{{.Names}}' | grep -q "^mariadb$"; then
+        echo -e "${GREEN}✅ Container 'mariadb' is already running on port 3002.${NC}"
+    elif docker ps -a --format '{{.Names}}' | grep -q "^mariadb$"; then
+        echo -e "${YELLOW}Container 'mariadb' exists but is stopped. Starting...${NC}"
+        docker start mariadb
     else
-        echo -e "${CYAN}Creating & running MariaDB container (panel-mariadb)...${NC}"
+        echo -e "${CYAN}Creating & running MariaDB container (mariadb)...${NC}"
         docker run -d \
-          --name panel-mariadb \
+          --name mariadb \
+          -e MARIADB_ROOT_PASSWORD=Nova \
+          -e MARIADB_DATABASE=Nova \
+          -e MARIADB_USER=Nova \
+          -e MARIADB_PASSWORD=NovaStudio \
+          -p 3002:3306 \
+          -v mariadb_data:/var/lib/mysql \
           --restart unless-stopped \
-          -e MARIADB_ROOT_PASSWORD=RootPass123! \
-          -e MARIADB_DATABASE=panel \
-          -e MARIADB_USER=panel \
-          -e MARIADB_PASSWORD=PanelPass123! \
-          -v panel_db:/var/lib/mysql \
-          -p 27017:3306 \
-          mariadb:11
+          mariadb:latest
+
+        sleep 5
+        docker exec mariadb mariadb -uroot -pNova -e "
+        CREATE DATABASE IF NOT EXISTS \`panel\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        CREATE USER IF NOT EXISTS 'panel'@'%' IDENTIFIED BY 'PanelPass123!';
+        GRANT ALL PRIVILEGES ON *.* TO 'panel'@'%' WITH GRANT OPTION;
+        GRANT ALL PRIVILEGES ON *.* TO 'Nova'@'%' WITH GRANT OPTION;
+        FLUSH PRIVILEGES;
+        " 2>/dev/null || true
     fi
 
-    update_db_env "127.0.0.1" "27017" "panel" "PanelPass123!" "panel"
-    echo -e "${GREEN}✅ Configuration updated to MariaDB (Port 27017).${NC}"
+    update_db_env "127.0.0.1" "3002" "panel" "PanelPass123!" "panel"
+    echo -e "${GREEN}✅ Configuration updated to MariaDB (Port 3002).${NC}"
 
     echo -e "${CYAN}⏳ Waiting for MariaDB to accept connections...${NC}"
     local retries=15
     while [ $retries -gt 0 ]; do
-        if docker logs panel-mariadb 2>&1 | grep -q "ready for connections"; then
+        if docker logs mariadb 2>&1 | grep -q "ready for connections"; then
             echo -e "${GREEN}✅ MariaDB is ready for connections!${NC}"
             break
         fi
@@ -622,7 +632,7 @@ start_mariadb_container() {
 
 start_mysql_container() {
     echo -e "${CYAN}======================================================${NC}"
-    echo -e "${WHITE}    🐬 Launching MySQL 8.0 Container (Port 27016)     ${NC}"
+    echo -e "${WHITE}  🐬 Launching MySQL 8.4 Container (Port 3005) [Server DB]${NC}"
     echo -e "${CYAN}======================================================${NC}"
     echo ""
 
@@ -632,47 +642,46 @@ start_mysql_container() {
         return 1
     fi
 
-    if docker ps --format '{{.Names}}' | grep -q "^mysql-db$"; then
-        echo -e "${GREEN}✅ Container 'mysql-db' is already running on port 27016.${NC}"
-    elif docker ps -a --format '{{.Names}}' | grep -q "^mysql-db$"; then
-        echo -e "${YELLOW}Container 'mysql-db' exists but is stopped. Starting...${NC}"
-        docker start mysql-db
+    if docker ps --format '{{.Names}}' | grep -q "^mysql$"; then
+        echo -e "${GREEN}✅ Container 'mysql' is already running on port 3005 / 3306.${NC}"
+    elif docker ps -a --format '{{.Names}}' | grep -q "^mysql$"; then
+        echo -e "${YELLOW}Container 'mysql' exists but is stopped. Starting...${NC}"
+        docker start mysql
     else
-        echo -e "${CYAN}Creating & running MySQL container (mysql-db)...${NC}"
+        echo -e "${CYAN}Creating & running MySQL 8.4 container (mysql)...${NC}"
         docker run -d \
-          --name mysql-db \
-          --restart unless-stopped \
-          -e MYSQL_ROOT_PASSWORD=StrongPassword123 \
-          -e MYSQL_DATABASE=panel \
-          -e MYSQL_USER=panel \
-          -e MYSQL_PASSWORD=PanelPassword123 \
-          -p 27016:3306 \
+          --name mysql \
+          -e MYSQL_ROOT_PASSWORD=YourStrongPassword \
+          -e MYSQL_DATABASE=mydatabase \
+          -e MYSQL_USER=myuser \
+          -e MYSQL_PASSWORD=YourUserPassword \
+          -p 3005:3306 \
+          -p 3306:3306 \
           -v mysql_data:/var/lib/mysql \
-          mysql:8.0
+          --restart unless-stopped \
+          mysql:8.4
+
+        sleep 5
+        docker exec mysql mysql -uroot -pYourStrongPassword -e "
+        CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'YourStrongPassword';
+        ALTER USER 'root'@'%' IDENTIFIED BY 'YourStrongPassword';
+        GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+        FLUSH PRIVILEGES;
+        " 2>/dev/null || true
     fi
 
-    update_db_env "127.0.0.1" "27016" "panel" "PanelPassword123" "panel"
-    echo -e "${GREEN}✅ Configuration updated to MySQL (Port 27016).${NC}"
+    echo -e "${GREEN}✅ Server DB MySQL 8.4 ready on port 3005 and 3306.${NC}"
 
     echo -e "${CYAN}⏳ Waiting for MySQL to accept connections...${NC}"
     local retries=20
     while [ $retries -gt 0 ]; do
-        if docker logs mysql-db 2>&1 | grep -q "ready for connections"; then
+        if docker logs mysql 2>&1 | grep -q "ready for connections"; then
             echo -e "${GREEN}✅ MySQL is ready for connections!${NC}"
             break
         fi
         sleep 2
         retries=$((retries - 1))
     done
-
-    echo ""
-    echo -e "${CYAN}🔄 Running schema migrations...${NC}"
-    npm run migrate
-
-    if pm2 list 2>/dev/null | grep -q "mpanel"; then
-        echo -e "${CYAN}🔄 Restarting Mpanel in PM2 to apply DB configuration...${NC}"
-        pm2 restart mpanel --update-env
-    fi
 
     wait_prompt
 }
@@ -691,7 +700,7 @@ db_status_view() {
     
     if command -v docker &>/dev/null; then
         echo -e "${WHITE}Docker Database Containers:${NC}"
-        docker ps -a --filter "name=panel-mariadb" --filter "name=mysql-db" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+        docker ps -a --filter "name=mariadb" --filter "name=mysql" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
     else
         echo -e "${YELLOW}Docker is not installed.${NC}"
     fi
@@ -699,7 +708,7 @@ db_status_view() {
     echo ""
     local db_host db_port db_name
     db_host=$(grep "^DB_HOST=" .env 2>/dev/null | cut -d '=' -f2 || echo "127.0.0.1")
-    db_port=$(grep "^DB_PORT=" .env 2>/dev/null | cut -d '=' -f2 || echo "27017")
+    db_port=$(grep "^DB_PORT=" .env 2>/dev/null | cut -d '=' -f2 || echo "3002")
     db_name=$(grep "^DB_NAME=" .env 2>/dev/null | cut -d '=' -f2 || echo "panel")
     echo -e "Current Config Target: ${CYAN}${db_host}:${db_port}/${db_name}${NC}"
 
@@ -708,15 +717,30 @@ db_status_view() {
       require('dotenv').config();
       mysql.createConnection({
         host: process.env.DB_HOST || '127.0.0.1',
-        port: parseInt(process.env.DB_PORT || '27017', 10),
+        port: parseInt(process.env.DB_PORT || '3002', 10),
         user: process.env.DB_USER || 'panel',
         password: process.env.DB_PASSWORD || 'PanelPass123!',
         database: process.env.DB_NAME || 'panel'
       }).then(c => { c.end(); process.exit(0); }).catch(e => process.exit(1));
     " &>/dev/null; then
-        echo -e "Connection Test:       ${GREEN}CONNECTED (Success)${NC}"
+        echo -e "Panel DB Connection (Port ${db_port}):  ${GREEN}CONNECTED (Success)${NC}"
     else
-        echo -e "Connection Test:       ${RED}DISCONNECTED (Failed to connect)${NC}"
+        echo -e "Panel DB Connection (Port ${db_port}):  ${RED}DISCONNECTED (Failed to connect)${NC}"
+    fi
+
+    if node -e "
+      const mysql = require('mysql2/promise');
+      require('dotenv').config();
+      mysql.createConnection({
+        host: process.env.SERVER_DB_HOST || '127.0.0.1',
+        port: parseInt(process.env.SERVER_DB_PORT || '3005', 10),
+        user: process.env.SERVER_DB_USER || 'root',
+        password: process.env.SERVER_DB_PASSWORD || 'YourStrongPassword'
+      }).then(c => { c.end(); process.exit(0); }).catch(e => process.exit(1));
+    " &>/dev/null; then
+        echo -e "Server DB Connection (Port 3005): ${GREEN}CONNECTED (Success)${NC}"
+    else
+        echo -e "Server DB Connection (Port 3005): ${RED}DISCONNECTED (Failed to connect)${NC}"
     fi
 
     echo ""
@@ -725,13 +749,13 @@ db_status_view() {
 
 db_logs_view() {
     echo -e "${CYAN}Select container logs to view:${NC}"
-    echo -e "  [1] MariaDB (panel-mariadb)"
-    echo -e "  [2] MySQL (mysql-db)"
+    echo -e "  [1] MariaDB (mariadb - Panel DB / Port 3002)"
+    echo -e "  [2] MySQL 8.4 (mysql - Server DB / Port 3005)"
     read -p "Select [1-2]: " log_opt
     if [ "$log_opt" == "2" ]; then
-        docker logs --tail 50 mysql-db
+        docker logs --tail 50 mysql 2>/dev/null || docker logs --tail 50 mysql-db
     else
-        docker logs --tail 50 panel-mariadb
+        docker logs --tail 50 mariadb 2>/dev/null || docker logs --tail 50 panel-mariadb
     fi
     echo ""
     wait_prompt
@@ -739,16 +763,15 @@ db_logs_view() {
 
 stop_db_container() {
     echo -e "${YELLOW}Stopping database containers...${NC}"
-    docker stop panel-mariadb 2>/dev/null || true
-    docker stop mysql-db 2>/dev/null || true
+    docker stop mariadb mysql panel-mariadb mysql-db 2>/dev/null || true
     echo -e "${GREEN}Database containers stopped.${NC}"
     wait_prompt
 }
 
 restart_db_container() {
     echo -e "${CYAN}Restarting database containers...${NC}"
-    docker restart panel-mariadb 2>/dev/null || true
-    docker restart mysql-db 2>/dev/null || true
+    docker restart mariadb 2>/dev/null || docker restart panel-mariadb 2>/dev/null || true
+    docker restart mysql 2>/dev/null || docker restart mysql-db 2>/dev/null || true
     echo -e "${GREEN}Database containers restarted.${NC}"
     wait_prompt
 }
@@ -759,25 +782,34 @@ ensure_mariadb_container() {
         return 0
     fi
 
-    if docker ps --format '{{.Names}}' | grep -qE '^(panel-mariadb|mysql-db)$'; then
+    if docker ps --format '{{.Names}}' | grep -qE '^(mariadb|panel-mariadb)$'; then
         return 0
     fi
 
-    if docker ps -a --format '{{.Names}}' | grep -q "^panel-mariadb$"; then
-        echo -e "${CYAN}Starting existing 'panel-mariadb' container...${NC}"
-        docker start panel-mariadb
+    if docker ps -a --format '{{.Names}}' | grep -q "^mariadb$"; then
+        echo -e "${CYAN}Starting existing 'mariadb' container...${NC}"
+        docker start mariadb
     else
-        echo -e "${CYAN}Launching MariaDB 11 container on port 27017...${NC}"
+        echo -e "${CYAN}Launching MariaDB container on port 3002...${NC}"
         docker run -d \
-          --name panel-mariadb \
+          --name mariadb \
+          -e MARIADB_ROOT_PASSWORD=Nova \
+          -e MARIADB_DATABASE=Nova \
+          -e MARIADB_USER=Nova \
+          -e MARIADB_PASSWORD=NovaStudio \
+          -p 3002:3306 \
+          -v mariadb_data:/var/lib/mysql \
           --restart unless-stopped \
-          -e MARIADB_ROOT_PASSWORD=RootPass123! \
-          -e MARIADB_DATABASE=panel \
-          -e MARIADB_USER=panel \
-          -e MARIADB_PASSWORD=PanelPass123! \
-          -v panel_db:/var/lib/mysql \
-          -p 27017:3306 \
-          mariadb:11
+          mariadb:latest
+
+        sleep 5
+        docker exec mariadb mariadb -uroot -pNova -e "
+        CREATE DATABASE IF NOT EXISTS \`panel\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        CREATE USER IF NOT EXISTS 'panel'@'%' IDENTIFIED BY 'PanelPass123!';
+        GRANT ALL PRIVILEGES ON *.* TO 'panel'@'%' WITH GRANT OPTION;
+        GRANT ALL PRIVILEGES ON *.* TO 'Nova'@'%' WITH GRANT OPTION;
+        FLUSH PRIVILEGES;
+        " 2>/dev/null || true
     fi
     sleep 3
 }
@@ -821,8 +853,8 @@ db_menu() {
         echo -e "  ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
         echo -e "  ${LIGHT_CYAN}╭── Database Controls ────────────────────────────────────────${NC}"
-        echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[1]${NC} ${WHITE}🚀  Start MariaDB Docker (Port 27017) [Recommended]${NC}"
-        echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[2]${NC} ${WHITE}🐬  Start MySQL 8.0 Docker (Port 27016)${NC}"
+        echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[1]${NC} ${WHITE}🚀  Start MariaDB Docker (Port 3002) [Panel DB]${NC}"
+        echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[2]${NC} ${WHITE}🐬  Start MySQL 8.4 Docker (Port 3005) [Server DB]${NC}"
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[3]${NC} ${WHITE}🔄  Run Database Migrations (npm run migrate)${NC}"
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[4]${NC} ${WHITE}📊  Check Database Status & Connection${NC}"
         echo -e "  ${LIGHT_CYAN}│${NC}  ${CYAN}[5]${NC} ${WHITE}📜  View Database Container Logs${NC}"
@@ -876,7 +908,7 @@ status_check() {
     # Check Ports
     echo ""
     echo -e "${WHITE}Port Status:${NC}"
-    for port in 3001 3003 3004 27017 27016; do
+    for port in 3001 3002 3003 3004 3005 3306; do
         if ss -tuln 2>/dev/null | grep -q ":$port " || netstat -tuln 2>/dev/null | grep -q ":$port "; then
             echo -e " • Port ${CYAN}$port${NC}: ${GREEN}ACTIVE (Listening)${NC}"
         else
@@ -889,21 +921,22 @@ status_check() {
     echo -e "${WHITE}Database Status:${NC}"
     local db_host db_port db_name
     db_host=$(grep "^DB_HOST=" .env 2>/dev/null | cut -d '=' -f2 || echo "127.0.0.1")
-    db_port=$(grep "^DB_PORT=" .env 2>/dev/null | cut -d '=' -f2 || echo "27017")
+    db_port=$(grep "^DB_PORT=" .env 2>/dev/null | cut -d '=' -f2 || echo "3002")
     db_name=$(grep "^DB_NAME=" .env 2>/dev/null | cut -d '=' -f2 || echo "panel")
-    echo -e " • Target: ${CYAN}${db_host}:${db_port}/${db_name}${NC}"
+    echo -e " • Panel DB Target:  ${CYAN}${db_host}:${db_port}/${db_name}${NC}"
+    echo -e " • Server DB Target: ${CYAN}127.0.0.1:3005/mydatabase${NC}"
 
     if command -v docker &>/dev/null; then
-        if docker ps --format '{{.Names}}' | grep -q "^panel-mariadb$"; then
-            echo -e " • Container ${CYAN}panel-mariadb${NC}: ${GREEN}ONLINE (Running)${NC}"
-        elif docker ps -a --format '{{.Names}}' | grep -q "^panel-mariadb$"; then
-            echo -e " • Container ${CYAN}panel-mariadb${NC}: ${YELLOW}STOPPED${NC}"
+        if docker ps --format '{{.Names}}' | grep -q "^mariadb$"; then
+            echo -e " • Container ${CYAN}mariadb (Panel DB)${NC}: ${GREEN}ONLINE (Running on port 3002)${NC}"
+        elif docker ps -a --format '{{.Names}}' | grep -q "^mariadb$"; then
+            echo -e " • Container ${CYAN}mariadb (Panel DB)${NC}: ${YELLOW}STOPPED${NC}"
         fi
 
-        if docker ps --format '{{.Names}}' | grep -q "^mysql-db$"; then
-            echo -e " • Container ${CYAN}mysql-db${NC}: ${GREEN}ONLINE (Running)${NC}"
-        elif docker ps -a --format '{{.Names}}' | grep -q "^mysql-db$"; then
-            echo -e " • Container ${CYAN}mysql-db${NC}: ${YELLOW}STOPPED${NC}"
+        if docker ps --format '{{.Names}}' | grep -q "^mysql$"; then
+            echo -e " • Container ${CYAN}mysql (Server DB)${NC}:  ${GREEN}ONLINE (Running on port 3005)${NC}"
+        elif docker ps -a --format '{{.Names}}' | grep -q "^mysql$"; then
+            echo -e " • Container ${CYAN}mysql (Server DB)${NC}:  ${YELLOW}STOPPED${NC}"
         fi
     fi
 
@@ -912,15 +945,30 @@ status_check() {
       require('dotenv').config();
       mysql.createConnection({
         host: process.env.DB_HOST || '127.0.0.1',
-        port: parseInt(process.env.DB_PORT || '27017', 10),
+        port: parseInt(process.env.DB_PORT || '3002', 10),
         user: process.env.DB_USER || 'panel',
         password: process.env.DB_PASSWORD || 'PanelPass123!',
         database: process.env.DB_NAME || 'panel'
       }).then(c => { c.end(); process.exit(0); }).catch(e => process.exit(1));
     " &>/dev/null; then
-        echo -e " • Connection: ${GREEN}CONNECTED (Success)${NC}"
+        echo -e " • Panel DB Connection:  ${GREEN}CONNECTED (Success)${NC}"
     else
-        echo -e " • Connection: ${RED}DISCONNECTED / ERROR${NC}"
+        echo -e " • Panel DB Connection:  ${RED}DISCONNECTED / ERROR${NC}"
+    fi
+
+    if node -e "
+      const mysql = require('mysql2/promise');
+      require('dotenv').config();
+      mysql.createConnection({
+        host: process.env.SERVER_DB_HOST || '127.0.0.1',
+        port: parseInt(process.env.SERVER_DB_PORT || '3005', 10),
+        user: process.env.SERVER_DB_USER || 'root',
+        password: process.env.SERVER_DB_PASSWORD || 'YourStrongPassword'
+      }).then(c => { c.end(); process.exit(0); }).catch(e => process.exit(1));
+    " &>/dev/null; then
+        echo -e " • Server DB Connection: ${GREEN}CONNECTED (Success)${NC}"
+    else
+        echo -e " • Server DB Connection: ${RED}DISCONNECTED / ERROR${NC}"
     fi
 
     echo ""

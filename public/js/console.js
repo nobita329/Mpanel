@@ -387,14 +387,19 @@ class ServerConsole {
       'mods': 'mod',
       'mod': 'mod',
       'version-changer': 'version-changer',
-      'version': 'version-changer'
+      'version': 'version-changer',
+      'properties': 'properties',
+      'players': 'players',
+      'importer': 'importer',
+      'splitter': 'splitter'
     };
 
     // Update left sidebar active tab
     document.querySelectorAll('#server-nav-links .nook-nav-item').forEach(btn => {
       btn.classList.remove('active');
     });
-    const activeSidebarLink = document.getElementById(`server-nav-${tabName}`);
+    const activeSidebarLink = document.getElementById(`server-nav-${tabName}`) ||
+      (directMarketplaceMap[tabName] ? document.getElementById('server-nav-marketplace') : null);
     if (activeSidebarLink) {
       activeSidebarLink.classList.add('active');
     }
@@ -801,10 +806,20 @@ class ServerConsole {
     app.showToast(`Font size: ${next}px`, 'info');
   }
 
-  onFontSizeSelect(val) {
+  async onFontSizeSelect(val) {
     if (val === 'custom') {
       const current = localStorage.getItem('mpanel_term_fontsize') || '12';
-      const customVal = prompt('Enter custom terminal font size (9 - 28 px):', current);
+      const customVal = await app.prompt({
+        tag: 'TERMINAL CONFIG',
+        tagIcon: 'terminal',
+        title: 'Terminal Font Size',
+        message: 'Enter custom terminal font size (9 - 28 px):',
+        placeholder: '12',
+        defaultValue: current,
+        confirmText: 'Apply Size',
+        confirmIcon: 'check',
+        type: 'info'
+      });
       if (customVal) {
         const num = parseInt(customVal, 10);
         if (!isNaN(num) && num >= 9 && num <= 28) {
@@ -1366,7 +1381,19 @@ class ServerConsole {
   }
 
   async restoreBackup(backupId) {
-    if (!confirm('Are you sure you want to restore this backup? All existing server files will be overwritten.')) return;
+    const ok = await app.confirm({
+      tag: 'RESTORE BACKUP',
+      tagIcon: 'archive',
+      title: 'Restore Backup',
+      badge: window.location.host,
+      message: 'Are you sure you want to restore this backup?',
+      subtext: 'All existing server files will be overwritten with the backup archive data.',
+      icon: 'archive',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Restore Backup',
+      type: 'warning'
+    });
+    if (!ok) return;
     try {
       app.toast('Restoring backup archive...', 'info');
       const data = await app.api(`/api/servers/${this.serverId}/backups/${backupId}/restore`, { method: 'POST' });
@@ -1390,7 +1417,19 @@ class ServerConsole {
   }
 
   async deleteBackup(backupId) {
-    if (!confirm('Are you sure you want to delete this backup archive?')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE BACKUP',
+      tagIcon: 'archive',
+      title: 'Delete Backup',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this backup archive?',
+      subtext: 'This backup archive will be permanently erased from storage.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Backup',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/servers/${this.serverId}/backups/${backupId}`, { method: 'DELETE' });
       if (data.success) {
@@ -1525,7 +1564,19 @@ class ServerConsole {
   }
 
   async deleteSchedule(scheduleId) {
-    if (!confirm('Are you sure you want to delete this schedule?')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE SCHEDULE',
+      tagIcon: 'clock',
+      title: 'Delete Schedule',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this schedule?',
+      subtext: 'Automated tasks associated with this schedule will be permanently cancelled.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Schedule',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/servers/${this.serverId}/schedules/${scheduleId}`, { method: 'DELETE' });
       if (data.success) {
@@ -1859,10 +1910,31 @@ class ServerConsole {
         <div id="startup-variables-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
           ${variablesCardsHtml}
         </div>
+
+        <!-- Section: Alternate Startup Profiles (Arix Addon Pack v2.0.2 - startupChanger) -->
+        <div class="pt-6 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h3 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                <i data-lucide="list-video" class="w-5 h-5 text-purple-400"></i> Alternate Startup Profiles
+                <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">ADDON v2.0.2</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">Quickly switch between saved command presets (Aikar's Flags, High Performance, Debugging, etc.)</p>
+            </div>
+            <button type="button" onclick="serverConsole.showCreateStartupProfileModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 transition-all flex items-center gap-1.5 shrink-0">
+              <i data-lucide="plus" class="w-4 h-4"></i> Save Profile
+            </button>
+          </div>
+
+          <div id="startup-profiles-list" class="space-y-3">
+            <div class="text-center py-6 text-slate-400 text-xs">Loading alternate profiles...</div>
+          </div>
+        </div>
       </div>
     `;
 
     if (window.lucide) lucide.createIcons();
+    this.loadStartupProfiles();
   }
 
   evaluateStartupCommand(template, envVars) {
@@ -2011,8 +2083,18 @@ class ServerConsole {
     }, 1200);
   }
 
-  showAddCustomVariableModal() {
-    const varName = prompt('Enter new variable name (e.g. DEBUG_MODE, SERVER_PORT, EXTRA_FLAGS):');
+  async showAddCustomVariableModal() {
+    const varName = await app.prompt({
+      tag: 'NEW VARIABLE',
+      tagIcon: 'terminal',
+      title: 'Startup Variable',
+      message: 'Enter new variable name (e.g. DEBUG_MODE, SERVER_PORT, EXTRA_FLAGS):',
+      placeholder: 'DEBUG_MODE',
+      defaultValue: '',
+      confirmText: 'Next',
+      confirmIcon: 'check',
+      type: 'info'
+    });
     if (!varName) return;
     const sanitizedKey = varName.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
     if (!sanitizedKey) {
@@ -2023,7 +2105,17 @@ class ServerConsole {
       app.toast(`Variable ${sanitizedKey} already exists.`, 'warning');
       return;
     }
-    const defaultVal = prompt(`Enter default value for ${sanitizedKey}:`, '') || '';
+    const defaultVal = await app.prompt({
+      tag: 'DEFAULT VALUE',
+      tagIcon: 'terminal',
+      title: 'Variable Value',
+      message: `Enter default value for ${sanitizedKey}:`,
+      placeholder: 'Value...',
+      defaultValue: '',
+      confirmText: 'Add Variable',
+      confirmIcon: 'plus',
+      type: 'info'
+    }) || '';
     this.currentStartupEnvVars[sanitizedKey] = defaultVal;
 
     const area = document.getElementById('subtab-content-area');
@@ -2033,8 +2125,20 @@ class ServerConsole {
     }
   }
 
-  deleteCustomVariable(key) {
-    if (!confirm(`Are you sure you want to remove variable "${key}"?`)) return;
+  async deleteCustomVariable(key) {
+    const ok = await app.confirm({
+      tag: 'DELETE VARIABLE',
+      tagIcon: 'sliders',
+      title: 'Remove Variable',
+      badge: window.location.host,
+      message: `Are you sure you want to remove variable "${key}"?`,
+      subtext: 'This environment variable will no longer be provided during server runtime.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Remove Variable',
+      type: 'danger'
+    });
+    if (!ok) return;
     delete this.currentStartupEnvVars[key];
     const area = document.getElementById('subtab-content-area');
     if (area) {
@@ -2234,7 +2338,19 @@ class ServerConsole {
   }
 
   async removeSubuser(subuserId) {
-    if (!confirm('Are you sure you want to remove this subuser?')) return;
+    const ok = await app.confirm({
+      tag: 'REVOKE ACCESS',
+      tagIcon: 'users',
+      title: 'Remove Subuser',
+      badge: window.location.host,
+      message: 'Are you sure you want to remove this subuser?',
+      subtext: 'This user will immediately lose all allocated management access to this server.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Remove Subuser',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/servers/${this.serverId}/subusers/${subuserId}`, { method: 'DELETE' });
       if (data.success) {
@@ -2359,6 +2475,83 @@ class ServerConsole {
             </div>
           </div>
 
+          <!-- Card: EGG & CONTAINER CHANGER (Arix Addon Pack v2.0.2) -->
+          <div class="col-span-full glass-panel p-6 rounded-3xl border border-purple-500/30 bg-purple-950/10 space-y-4 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  <i data-lucide="shuffle" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    Egg & Container Image Changer <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">ADDON v2.0.2</span>
+                  </h4>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    Switch between Minecraft Java runtimes, Node.js versions, Python, or custom templates with automatic startup command matching
+                  </p>
+                </div>
+              </div>
+
+              <button type="button" onclick="serverConsole.showEggChangerModal()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 transition-all flex items-center gap-2 shrink-0">
+                <i data-lucide="sliders" class="w-4 h-4"></i> Switch Egg Runtime
+              </button>
+            </div>
+          </div>
+
+          <!-- Card: ICON & BRANDING CHANGER (Arix Addon Pack v2.0.2) -->
+          <div class="col-span-full glass-panel p-6 rounded-3xl border border-blue-500/30 bg-blue-950/10 space-y-4 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden border border-blue-500/30">
+                  <img id="server-icon-preview" src="/api/servers/${this.serverId}/files/raw?path=server-icon.png" onerror="this.onerror=null; this.parentElement.innerHTML='<i data-lucide=&quot;image&quot; class=&quot;w-6 h-6 text-blue-400&quot;></i>'; if(window.lucide)lucide.createIcons();" class="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    Server Icon Changer <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">ADDON v2.0.2</span>
+                  </h4>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    Upload any image to automatically generate and save a 64x64 server-icon.png in your server root directory.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <input type="file" id="server-icon-upload-input" accept="image/*" class="hidden" onchange="serverConsole.handleUploadServerIcon(this)" />
+                <button type="button" onclick="document.getElementById('server-icon-upload-input').click()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2 shrink-0">
+                  <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload Icon (64x64)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card: FIVEM UTILITIES & CACHE (Arix Addon Pack v2.0.2) -->
+          <div class="col-span-full glass-panel p-6 rounded-3xl border border-amber-500/30 bg-amber-950/10 space-y-4 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  <i data-lucide="wrench" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    FiveM Utilities & Cache Manager <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">ADDON v2.0.2</span>
+                  </h4>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    Manage txAdmin automatic startup, clean server cache files, and manage FiveM artifacts.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <button type="button" onclick="serverConsole.handleCleanFivemCache()" class="px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-300 transition-all flex items-center gap-1.5">
+                  <i data-lucide="trash" class="w-3.5 h-3.5"></i> Clear Cache
+                </button>
+                <button type="button" onclick="serverConsole.handleFivemTxAdmin(true)" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/20 transition-all flex items-center gap-1.5">
+                  <i data-lucide="play" class="w-3.5 h-3.5"></i> Enable txAdmin
+                </button>
+              </div>
+            </div>
+          </div>
+
           ${(app.user && app.user.role === 'admin') ? `
           <!-- Card 5: DELETE SERVER (Bottom Full Width - Admin Only) -->
           <div class="col-span-full glass-panel p-6 rounded-3xl border border-rose-500/20 bg-rose-950/10 space-y-3 shadow-xl">
@@ -2446,7 +2639,19 @@ class ServerConsole {
   }
 
   async handleReinstallServer() {
-    if (!confirm('Are you sure you want to reinstall this server? Reinstalling will stop the server and re-apply default configuration.')) return;
+    const ok = await app.confirm({
+      tag: 'REINSTALL SERVER',
+      tagIcon: 'refresh-cw',
+      title: 'Reinstall Server',
+      badge: window.location.host,
+      message: 'Are you sure you want to reinstall this server?',
+      subtext: 'Reinstalling will stop the server and re-apply default configuration and runtime scripts.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reinstall Server',
+      type: 'warning'
+    });
+    if (!ok) return;
     try {
       app.toast('Reinstalling server base files...', 'info');
       const data = await app.api(`/api/servers/${this.serverId}/reinstall`, { method: 'POST' });
@@ -2463,7 +2668,19 @@ class ServerConsole {
       app.toast('Permission denied: Only administrators can delete servers. Normal users cannot delete servers.', 'error');
       return;
     }
-    if (!confirm('DANGER: Are you absolutely sure you want to delete this server? This action CANNOT be undone!')) return;
+    const ok = await app.confirm({
+      tag: 'DESTROY SERVER',
+      tagIcon: 'alert-triangle',
+      title: 'Delete Server',
+      badge: window.location.host,
+      message: 'Are you absolutely sure you want to delete this server?',
+      subtext: 'DANGER: This action CANNOT be undone! Container volumes and all server files will be permanently erased.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Server',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/servers/${this.serverId}`, { method: 'DELETE' });
       if (data.success) {
@@ -2640,6 +2857,16 @@ class ServerConsole {
                   <i data-lucide="copy" class="w-3 h-3"></i> Copy JDBC
                 </button>
               </div>
+
+              <!-- Database Import/Export Addon v2.0.2 -->
+              <div class="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                <a href="/api/servers/${this.serverId}/addons/databases/${db.id}/export" class="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5 transition font-medium text-[11px]" download>
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Export SQL
+                </a>
+                <button type="button" onclick="serverConsole.showImportDatabaseModal(${db.id}, '${db.database_name}')" class="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 transition font-medium text-[11px]">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i> Import SQL
+                </button>
+              </div>
             </div>
           `;
         }).join('');
@@ -2720,7 +2947,19 @@ class ServerConsole {
   }
 
   async resetDatabasePassword(dbId) {
-    if (!confirm('Are you sure you want to reset this database password? Any plugins currently connected with the old password will fail to authenticate until reconfigured.')) return;
+    const ok = await app.confirm({
+      tag: 'DATABASE SECURITY',
+      tagIcon: 'key',
+      title: 'Reset Password',
+      badge: window.location.host,
+      message: 'Are you sure you want to reset this database password?',
+      subtext: 'Any plugins or applications currently connected will fail to authenticate until reconfigured.',
+      icon: 'key',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reset Password',
+      type: 'warning'
+    });
+    if (!ok) return;
     try {
       await app.api(`/api/servers/${this.serverId}/databases/${dbId}/reset-password`, { method: 'POST' });
       app.showToast('Database password reset successfully!', 'success');
@@ -2731,7 +2970,19 @@ class ServerConsole {
   }
 
   async deleteDatabase(dbId) {
-    if (!confirm('CAUTION: Are you sure you want to completely drop and delete this database? All stored tables and data will be permanently removed!')) return;
+    const ok = await app.confirm({
+      tag: 'DROP DATABASE',
+      tagIcon: 'database',
+      title: 'Delete Database',
+      badge: window.location.host,
+      message: 'CAUTION: Are you sure you want to completely drop and delete this database?',
+      subtext: 'All stored tables, records, and schema data will be permanently removed!',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Database',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       await app.api(`/api/servers/${this.serverId}/databases/${dbId}`, { method: 'DELETE' });
       app.showToast('Database deleted successfully.', 'success');
@@ -2746,21 +2997,64 @@ class ServerConsole {
   // ==========================================
   async renderNetworkTab(container) {
     container.innerHTML = `
-      <div class="space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <i data-lucide="network" class="w-5 h-5 text-cyan-400"></i> Network Allocations
-            </h3>
-            <p class="text-xs text-slate-400">Manage primary port bindings and extra network ports allocated to this server</p>
+      <div class="space-y-8">
+        <!-- Section 1: Network Allocations -->
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="network" class="w-5 h-5 text-cyan-400"></i> Network Allocations
+              </h3>
+              <p class="text-xs text-slate-400">Manage primary port bindings and extra network ports allocated to this server</p>
+            </div>
+            <button type="button" onclick="serverConsole.showAssignPortModal()" class="nook-btn-primary flex items-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i> Assign Port
+            </button>
           </div>
-          <button type="button" onclick="serverConsole.showAssignPortModal()" class="nook-btn-primary flex items-center gap-2">
-            <i data-lucide="plus" class="w-4 h-4"></i> Assign Port
-          </button>
+
+          <div id="server-network-list" class="space-y-3">
+            <div class="text-center py-8 text-slate-400 text-xs">Loading network allocations...</div>
+          </div>
         </div>
 
-        <div id="server-network-list" class="space-y-3">
-          <div class="text-center py-10 text-slate-400">Loading network allocations...</div>
+        <!-- Section 2: Custom Subdomains (Arix Addon Pack v2.0.2 - subdomainManager) -->
+        <div class="space-y-4 pt-6 border-t border-white/5">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i data-lucide="globe" class="w-5 h-5 text-blue-400"></i> Custom Subdomains
+                </h3>
+                <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">ADDON v2.0.2</span>
+                <span id="subdomain-count-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10">0 / 1 used</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Create a personalized domain name (e.g. play.yourdomain.com) connecting directly to your server</p>
+            </div>
+            <button type="button" onclick="serverConsole.showCreateSubdomainModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 shrink-0">
+              <i data-lucide="plus" class="w-4 h-4"></i> Create Subdomain
+            </button>
+          </div>
+
+          <div id="server-subdomain-list" class="space-y-3">
+            <div class="text-center py-6 text-slate-400 text-xs">Loading subdomains...</div>
+          </div>
+        </div>
+
+        <!-- Section 3: DNS Record Generator (Arix Addon Pack v2.0.2 - recordGenerator) -->
+        <div class="space-y-4 pt-6 border-t border-white/5">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="file-code" class="w-5 h-5 text-purple-400"></i> DNS Record Generator
+                <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">ADDON v2.0.2</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">Pre-configured DNS records (A, CNAME, SRV) for Cloudflare, Namecheap, GoDaddy, or your own DNS manager</p>
+            </div>
+          </div>
+
+          <div id="server-dns-records" class="space-y-3">
+            <div class="text-center py-6 text-slate-400 text-xs">Generating DNS records...</div>
+          </div>
         </div>
       </div>
     `;
@@ -2771,51 +3065,770 @@ class ServerConsole {
       const primaryId = data.primary_allocation_id;
       this.availableAllocations = data.available_allocations || [];
       const listEl = document.getElementById('server-network-list');
-      if (!listEl) return;
-
-      if (allocations.length === 0) {
-        listEl.innerHTML = `<div class="glass-card p-8 rounded-2xl text-center border border-dashed border-white/20 text-slate-400 text-xs">No allocations found for this server.</div>`;
-      } else {
-        listEl.innerHTML = allocations.map(a => {
-          const isPrimary = (a.id === primaryId);
-          const fullAddr = `${a.ip}:${a.port}`;
-          return `
-            <div class="glass-card p-4 rounded-2xl border ${isPrimary ? 'border-cyan-500/50 bg-cyan-950/10' : 'border-white/10'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl ${isPrimary ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800 text-slate-400'} flex items-center justify-center font-bold text-xs shrink-0">
-                  <i data-lucide="${isPrimary ? 'radio' : 'network'}" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold font-mono text-white">${fullAddr}</span>
-                    ${isPrimary ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">PRIMARY</span>' : ''}
+      if (listEl) {
+        if (allocations.length === 0) {
+          listEl.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center border border-dashed border-white/20 text-slate-400 text-xs">No allocations found for this server.</div>`;
+        } else {
+          listEl.innerHTML = allocations.map(a => {
+            const isPrimary = (a.id === primaryId);
+            const fullAddr = `${a.ip}:${a.port}`;
+            return `
+              <div class="glass-card p-4 rounded-2xl border ${isPrimary ? 'border-cyan-500/50 bg-cyan-950/10' : 'border-white/10'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl ${isPrimary ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800 text-slate-400'} flex items-center justify-center font-bold text-xs shrink-0">
+                    <i data-lucide="${isPrimary ? 'radio' : 'network'}" class="w-5 h-5"></i>
                   </div>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Node: <span class="text-slate-300 font-medium">${a.node_name || 'Node'}</span> &bull; Port: <span class="font-mono text-slate-300">${a.port}</span></p>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-bold font-mono text-white">${fullAddr}</span>
+                      ${isPrimary ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">PRIMARY</span>' : ''}
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Node: <span class="text-slate-300 font-medium">${a.node_name || 'Node'}</span> &bull; Port: <span class="font-mono text-slate-300">${a.port}</span></p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 self-end sm:self-center">
+                  <button type="button" onclick="app.copyToClipboard('${fullAddr}')" title="Copy Address" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs flex items-center gap-1.5 transition">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                  </button>
+                  ${!isPrimary ? `
+                    <button type="button" onclick="serverConsole.handleSetPrimaryPort(${a.id})" title="Set as Primary Bind Port" class="px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-xs font-semibold flex items-center gap-1.5 border border-cyan-500/20 transition">
+                      <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Make Primary
+                    </button>
+                    <button type="button" onclick="serverConsole.handleUnassignPort(${a.id})" title="Remove Port Allocation" class="p-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  ` : ''}
                 </div>
               </div>
+            `;
+          }).join('');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      app.showToast('Failed to load network allocations: ' + err.message, 'error');
+    }
 
-              <div class="flex items-center gap-2 self-end sm:self-center">
-                <button type="button" onclick="app.copyToClipboard('${fullAddr}')" title="Copy Address" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs flex items-center gap-1.5 transition">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+    // Load Subdomains & DNS records
+    this.loadServerSubdomains();
+    this.loadDnsRecords();
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // --------------------------------------------------
+  // Subdomains Addon (Client)
+  // --------------------------------------------------
+  async loadServerSubdomains() {
+    const listEl = document.getElementById('server-subdomain-list');
+    const badgeEl = document.getElementById('subdomain-count-badge');
+    if (!listEl) return;
+
+    try {
+      const data = await app.api(`/api/servers/${this.serverId}/addons/subdomains`);
+      const subdomains = data.subdomains || [];
+      const limit = data.limit || 1;
+
+      if (badgeEl) {
+        badgeEl.innerText = `${subdomains.length} / ${limit} used`;
+      }
+
+      if (subdomains.length === 0) {
+        listEl.innerHTML = `
+          <div class="glass-card p-6 rounded-2xl text-center border border-dashed border-white/20 text-slate-400 text-xs">
+            No custom subdomains created yet. Click "Create Subdomain" to set up your domain.
+          </div>
+        `;
+      } else {
+        listEl.innerHTML = subdomains.map(sub => `
+          <div class="glass-card p-4 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="globe" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold font-mono text-white">${sub.full_domain}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">ACTIVE</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Target: <span class="text-slate-300 font-mono">${sub.domain}</span></p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-center">
+              <button type="button" onclick="app.copyToClipboard('${sub.full_domain}')" title="Copy Subdomain" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs flex items-center gap-1.5 transition">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+              </button>
+              <button type="button" onclick="serverConsole.handleDeleteSubdomain(${sub.id})" title="Delete Subdomain" class="p-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      listEl.innerHTML = `<div class="p-4 bg-rose-500/10 text-rose-300 rounded-xl text-xs">Failed to load subdomains: ${err.message}</div>`;
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  async showCreateSubdomainModal() {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="globe" class="w-5 h-5 text-blue-400"></i> Create Custom Subdomain
+            </h3>
+            <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <div class="py-8 text-center text-slate-400 text-xs"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto text-blue-400 mb-2"></i> Loading available domains...</div>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+
+    try {
+      const domData = await app.api('/api/addons/subdomains/available-domains');
+      const domains = domData.domains || [];
+
+      if (domains.length === 0) {
+        modalContainer.innerHTML = `
+          <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+            <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i data-lucide="globe" class="w-5 h-5 text-blue-400"></i> Create Custom Subdomain
+                </h3>
+                <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+                  <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                ${!isPrimary ? `
-                  <button type="button" onclick="serverConsole.handleSetPrimaryPort(${a.id})" title="Set as Primary Bind Port" class="px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-xs font-semibold flex items-center gap-1.5 border border-cyan-500/20 transition">
-                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Make Primary
-                  </button>
-                  <button type="button" onclick="serverConsole.handleUnassignPort(${a.id})" title="Remove Port Allocation" class="p-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </div>
+              <div class="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-xl text-xs space-y-2">
+                <p class="font-bold">No connected domains available!</p>
+                <p class="text-slate-400">The server administrator has not added any connected base domains in Admin -> Addons -> Subdomain Manager yet.</p>
+              </div>
+              <div class="flex justify-end">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10">Close</button>
+              </div>
+            </div>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      modalContainer.innerHTML = `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="globe" class="w-5 h-5 text-blue-400"></i> Create Custom Subdomain
+              </h3>
+              <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            
+            <form onsubmit="serverConsole.handleCreateSubdomainSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Subdomain Prefix</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="subdomain-prefix" placeholder="play" pattern="[a-zA-Z0-9-]{2,32}" title="Alphanumeric and dashes only (2-32 chars)" class="flex-1 glass-input px-3.5 py-2 rounded-xl text-xs font-mono" required />
+                  <span class="text-slate-400 text-sm font-mono">.</span>
+                  <select id="subdomain-domain" class="flex-1 glass-input px-3.5 py-2 rounded-xl text-xs bg-slate-900 font-mono">
+                    ${domains.map(d => `<option value="${d}">${d}</option>`).join('')}
+                  </select>
+                </div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Only alphanumeric characters and hyphens allowed.</span>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-white/5">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5">
+                  <i data-lucide="plus" class="w-4 h-4"></i> Create Subdomain
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } catch (err) {
+      modalContainer.innerHTML = '';
+      app.showToast('Failed to load domains: ' + err.message, 'error');
+    }
+  }
+
+  async handleCreateSubdomainSubmit(e) {
+    e.preventDefault();
+    const prefix = document.getElementById('subdomain-prefix')?.value.trim();
+    const domain = document.getElementById('subdomain-domain')?.value.trim();
+
+    if (!prefix || !domain) {
+      app.showToast('Please enter subdomain prefix and select domain', 'warning');
+      return;
+    }
+
+    try {
+      const res = await app.api(`/api/servers/${this.serverId}/addons/subdomains`, {
+        method: 'POST',
+        body: JSON.stringify({ subdomain: prefix, domain })
+      });
+      document.getElementById('modal-container').innerHTML = '';
+      app.showToast(res.message || 'Subdomain created successfully!', 'success');
+      this.loadServerSubdomains();
+    } catch (err) {
+      app.showToast('Failed to create subdomain: ' + err.message, 'error');
+    }
+  }
+
+  async handleDeleteSubdomain(subId) {
+    const ok = await app.confirm({
+      tag: 'DELETE SUBDOMAIN',
+      tagIcon: 'globe',
+      title: 'Delete Subdomain',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this custom subdomain?',
+      subtext: 'DNS routing records will be detached and external connections will be stopped.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Subdomain',
+      type: 'danger'
+    });
+    if (!ok) return;
+    try {
+      await app.api(`/api/servers/${this.serverId}/addons/subdomains/${subId}`, { method: 'DELETE' });
+      app.showToast('Subdomain deleted successfully.', 'success');
+      this.loadServerSubdomains();
+    } catch (err) {
+      app.showToast('Failed to delete subdomain: ' + err.message, 'error');
+    }
+  }
+
+  // --------------------------------------------------
+  // DNS Record Generator Addon (Client)
+  // --------------------------------------------------
+  async loadDnsRecords() {
+    const recordsEl = document.getElementById('server-dns-records');
+    if (!recordsEl) return;
+
+    try {
+      const data = await app.api(`/api/servers/${this.serverId}/addons/record-generator`);
+      const records = data.records || [];
+
+      if (records.length === 0) {
+        recordsEl.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center border border-dashed border-white/20 text-slate-400 text-xs">No DNS records generated.</div>`;
+      } else {
+        recordsEl.innerHTML = `
+          <div class="glass-panel overflow-hidden rounded-2xl border border-white/10">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-white/5 border-b border-white/10 text-slate-400 text-[11px]">
+                  <tr>
+                    <th class="p-3">Type</th>
+                    <th class="p-3">Name / Host</th>
+                    <th class="p-3">Target / Value</th>
+                    <th class="p-3">TTL</th>
+                    <th class="p-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 text-slate-300">
+                  ${records.map(r => `
+                    <tr class="hover:bg-white/[0.02] transition">
+                      <td class="p-3 font-mono font-bold text-purple-400">${r.type}</td>
+                      <td class="p-3 font-mono text-white">${r.name}</td>
+                      <td class="p-3 font-mono text-cyan-300">${r.target}${r.port ? ` (Port: ${r.port})` : ''}</td>
+                      <td class="p-3 text-slate-400 text-[11px]">${r.ttl}</td>
+                      <td class="p-3">
+                        <button type="button" onclick="app.copyToClipboard('${r.type === 'SRV' ? `${r.type} ${r.name} ${r.priority} ${r.weight} ${r.port} ${r.target}` : `${r.target}`}')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] flex items-center gap-1 transition">
+                          <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+    } catch (err) {
+      recordsEl.innerHTML = `<div class="p-4 bg-rose-500/10 text-rose-300 rounded-xl text-xs">Failed to load DNS records: ${err.message}</div>`;
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // --------------------------------------------------
+  // Alternate Startup Profiles (Client)
+  // --------------------------------------------------
+  async loadStartupProfiles() {
+    const listEl = document.getElementById('startup-profiles-list');
+    if (!listEl) return;
+
+    try {
+      const data = await app.api(`/api/servers/${this.serverId}/addons/startup-commands`);
+      const commands = data.commands || [];
+      const currentStartup = data.currentStartup || '';
+
+      if (commands.length === 0) {
+        listEl.innerHTML = `
+          <div class="glass-card p-6 rounded-2xl text-center border border-dashed border-white/20 text-slate-400 text-xs">
+            No alternate startup profiles saved yet. Click "Save Profile" to store your current command as a preset.
+          </div>
+        `;
+      } else {
+        listEl.innerHTML = commands.map(cmd => {
+          const isActive = (cmd.command.trim() === currentStartup.trim());
+          return `
+            <div class="glass-card p-4 rounded-2xl border ${isActive ? 'border-purple-500/50 bg-purple-950/10' : 'border-white/10'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold text-white">${cmd.name}</span>
+                  ${isActive ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">ACTIVE</span>' : ''}
+                </div>
+                <p class="text-xs font-mono text-slate-400 mt-1 truncate bg-slate-900/60 p-2 rounded-xl border border-white/5">${cmd.command}</p>
+              </div>
+
+              <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                ${!isActive ? `
+                  <button type="button" onclick="serverConsole.handleSwitchStartupCommand(${cmd.id})" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-600/20 transition flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Use Profile
                   </button>
                 ` : ''}
+                <button type="button" onclick="serverConsole.handleDeleteStartupCommand(${cmd.id})" class="p-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="Delete Profile">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
               </div>
             </div>
           `;
         }).join('');
       }
     } catch (err) {
-      console.error(err);
-      app.showToast('Failed to load network allocations: ' + err.message, 'error');
+      listEl.innerHTML = `<div class="p-4 bg-rose-500/10 text-rose-300 rounded-xl text-xs">Failed to load profiles: ${err.message}</div>`;
     }
     if (window.lucide) lucide.createIcons();
+  }
+
+  showCreateStartupProfileModal() {
+    const rawCmd = document.getElementById('startup-cmd-raw-input')?.value || this.currentStartupTemplate || '';
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="list-video" class="w-5 h-5 text-purple-400"></i> Save Alternate Profile
+            </h3>
+            <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <form onsubmit="serverConsole.handleCreateStartupProfileSubmit(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Profile Name</label>
+              <input type="text" id="new-profile-name" placeholder="e.g. Aikar's Flags / High Performance" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs" required />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Startup Command Template</label>
+              <textarea id="new-profile-cmd" rows="3" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs font-mono" required>${rawCmd}</textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+              <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-white/5">Cancel</button>
+              <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 transition">Save Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+  }
+
+  async handleCreateStartupProfileSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('new-profile-name')?.value.trim();
+    const command = document.getElementById('new-profile-cmd')?.value.trim();
+
+    if (!name || !command) return;
+
+    try {
+      await app.api(`/api/servers/${this.serverId}/addons/startup-commands`, {
+        method: 'POST',
+        body: JSON.stringify({ name, command })
+      });
+      document.getElementById('modal-container').innerHTML = '';
+      app.showToast('Startup profile saved successfully!', 'success');
+      this.loadStartupProfiles();
+    } catch (err) {
+      app.showToast('Failed to save profile: ' + err.message, 'error');
+    }
+  }
+
+  async handleSwitchStartupCommand(cmdId) {
+    try {
+      const res = await app.api(`/api/servers/${this.serverId}/addons/startup-commands/${cmdId}`, {
+        method: 'PUT'
+      });
+      app.showToast(res.message || 'Switched startup profile!', 'success');
+      if (res.activeCommand) {
+        this.currentStartupTemplate = res.activeCommand;
+        const rawInput = document.getElementById('startup-cmd-raw-input');
+        if (rawInput) rawInput.value = res.activeCommand;
+        this.updateStartupPreview();
+      }
+      this.loadStartupProfiles();
+    } catch (err) {
+      app.showToast('Failed to switch startup command: ' + err.message, 'error');
+    }
+  }
+
+  async handleDeleteStartupCommand(cmdId) {
+    const ok = await app.confirm({
+      tag: 'DELETE PROFILE',
+      tagIcon: 'sliders',
+      title: 'Delete Profile',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this startup profile?',
+      subtext: 'This startup profile configuration will be permanently removed.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Profile',
+      type: 'danger'
+    });
+    if (!ok) return;
+    try {
+      await app.api(`/api/servers/${this.serverId}/addons/startup-commands/${cmdId}`, { method: 'DELETE' });
+      app.showToast('Startup profile deleted.', 'success');
+      this.loadStartupProfiles();
+    } catch (err) {
+      app.showToast('Failed to delete profile: ' + err.message, 'error');
+    }
+  }
+
+  // --------------------------------------------------
+  // Database Import/Export Addon (Client)
+  // --------------------------------------------------
+  showImportDatabaseModal(dbId, dbName) {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="upload" class="w-5 h-5 text-cyan-400"></i> Import SQL Dump
+            </h3>
+            <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <p class="text-xs text-slate-300">
+            Select a <code class="text-cyan-400">.sql</code> file to import into <strong class="text-white">${dbName}</strong>. Existing tables may be updated or replaced.
+          </p>
+          <form onsubmit="serverConsole.handleImportDatabaseSubmit(event, ${dbId})" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">SQL File</label>
+              <input type="file" id="import-sql-file" accept=".sql" required class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-300 hover:file:bg-cyan-500/20 cursor-pointer bg-slate-900/60 p-2 rounded-xl border border-white/10" />
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+              <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-white/5">Cancel</button>
+              <button type="submit" id="btn-submit-import-sql" class="nook-btn-primary text-xs flex items-center gap-1.5">
+                <i data-lucide="upload" class="w-4 h-4"></i> Import File
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+  }
+
+  async handleImportDatabaseSubmit(e, dbId) {
+    e.preventDefault();
+    const fileInput = document.getElementById('import-sql-file');
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+      app.showToast('Please select a SQL file to import', 'warning');
+      return;
+    }
+    const file = fileInput.files[0];
+    const btn = document.getElementById('btn-submit-import-sql');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Importing...';
+      if (window.lucide) lucide.createIcons();
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await app.api(`/api/servers/${this.serverId}/addons/databases/${dbId}/import`, {
+        method: 'POST',
+        body: formData
+      });
+
+      document.getElementById('modal-container').innerHTML = '';
+      app.showToast('SQL dump imported successfully!', 'success');
+      this.renderDatabasesTab(document.getElementById('subtab-content-area'));
+    } catch (err) {
+      app.showToast('Import failed: ' + err.message, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i> Import File';
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  }
+
+  // --------------------------------------------------
+  // Egg & Container Changer Addon (Client)
+  // --------------------------------------------------
+  async showEggChangerModal() {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="shuffle" class="w-5 h-5 text-purple-400"></i> Egg & Runtime Changer
+            </h3>
+            <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <div class="py-10 text-center text-slate-400"><i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto text-purple-400 mb-2"></i> Loading runtimes...</div>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+
+    try {
+      const data = await app.api(`/api/servers/${this.serverId}/addons/egg-changer`);
+      const eggs = data.availableEggs || [];
+      const current = data.currentEgg || {};
+
+      modalContainer.innerHTML = `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="shuffle" class="w-5 h-5 text-purple-400"></i> Egg & Runtime Changer
+              </h3>
+              <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            
+            <div class="p-3 bg-white/5 rounded-2xl border border-white/10 text-xs space-y-1">
+              <div class="text-slate-400 font-mono text-[11px] truncate">Current Docker Image: <span class="text-purple-300 font-bold">${current.docker_image || 'None'}</span></div>
+              <div class="text-slate-400 text-[11px]">Server Type: <span class="text-white capitalize">${current.server_type || 'Custom'}</span></div>
+            </div>
+
+            <form onsubmit="serverConsole.handleEggChangerSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Egg / Target Environment</label>
+                <select id="egg-changer-select" onchange="serverConsole.onEggChangerSelect(this)" class="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs bg-slate-900 border border-white/10 text-white">
+                  ${eggs.map(e => `
+                    <option value="${e.docker_image}" data-cmd="${e.default_startup || ''}" data-type="${e.category.toLowerCase()}" ${e.docker_image === current.docker_image ? 'selected' : ''}>
+                      [${e.category}] ${e.name}
+                    </option>
+                  `).join('')}
+                  <option value="custom">Custom Docker Image / Egg</option>
+                </select>
+              </div>
+
+              <div id="egg-custom-docker-box" class="hidden">
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Custom Docker Image</label>
+                <input type="text" id="egg-custom-docker-val" placeholder="e.g. ghcr.io/pterodactyl/yolks:java_21" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs font-mono" />
+              </div>
+
+              <div class="space-y-2 pt-2 border-t border-white/5">
+                <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+                  <input type="checkbox" id="egg-update-startup" checked class="w-4 h-4 rounded text-purple-600 bg-slate-900 border-white/20 focus:ring-purple-500" />
+                  <span>Automatically update startup command template to match new egg</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+                  <input type="checkbox" id="egg-reinstall-server" class="w-4 h-4 rounded text-rose-600 bg-slate-900 border-white/20 focus:ring-rose-500" />
+                  <span class="text-rose-400 font-semibold">Reinstall server files (Wipes/reinstalls default templates for new runtime)</span>
+                </label>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-white/5">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 transition-all flex items-center gap-1.5">
+                  <i data-lucide="check" class="w-4 h-4"></i> Apply Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } catch (err) {
+      modalContainer.innerHTML = '';
+      app.showToast('Failed to load egg data: ' + err.message, 'error');
+    }
+  }
+
+  onEggChangerSelect(sel) {
+    const customBox = document.getElementById('egg-custom-docker-box');
+    if (customBox) {
+      if (sel.value === 'custom') {
+        customBox.classList.remove('hidden');
+      } else {
+        customBox.classList.add('hidden');
+      }
+    }
+  }
+
+  async handleEggChangerSubmit(e) {
+    e.preventDefault();
+    const sel = document.getElementById('egg-changer-select');
+    const customInput = document.getElementById('egg-custom-docker-val');
+    const updateStartup = document.getElementById('egg-update-startup')?.checked;
+    const reinstall = document.getElementById('egg-reinstall-server')?.checked;
+
+    let dockerImage = sel.value;
+    let startupCmd = '';
+    let serverType = '';
+
+    if (dockerImage === 'custom') {
+      dockerImage = customInput ? customInput.value.trim() : '';
+      if (!dockerImage) {
+        app.showToast('Please enter custom docker image', 'warning');
+        return;
+      }
+    } else {
+      const opt = sel.options[sel.selectedIndex];
+      startupCmd = opt?.getAttribute('data-cmd') || '';
+      serverType = opt?.getAttribute('data-type') || '';
+    }
+
+    if (reinstall) {
+      const ok = await app.confirm({
+        tag: 'WIPE & REINSTALL',
+        tagIcon: 'refresh-cw',
+        title: 'Reinstall Defaults',
+        badge: window.location.host,
+        message: 'WARNING: Reinstalling will wipe key configuration files and replace them with new runtime defaults.',
+        subtext: 'Are you sure you want to proceed with this configuration overwrite?',
+        icon: 'refresh-cw',
+        confirmIcon: 'refresh-cw',
+        confirmText: 'Proceed Reinstall',
+        type: 'warning'
+      });
+      if (!ok) return;
+    }
+
+    try {
+      await app.api(`/api/servers/${this.serverId}/addons/egg-changer`, {
+        method: 'POST',
+        body: JSON.stringify({
+          docker_image: dockerImage,
+          startup_cmd: startupCmd,
+          server_type: serverType,
+          update_startup: updateStartup,
+          reinstall: reinstall
+        })
+      });
+
+      document.getElementById('modal-container').innerHTML = '';
+      app.showToast('Egg runtime updated successfully!', 'success');
+      this.renderSettingsTab(document.getElementById('subtab-content-area'));
+    } catch (err) {
+      app.showToast('Failed to update egg: ' + err.message, 'error');
+    }
+  }
+
+  // --------------------------------------------------
+  // Server Icon Changer (Arix Addon Pack v2.0.2 - Canvas 64x64)
+  // --------------------------------------------------
+  async handleUploadServerIcon(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) {
+      app.showToast('Only image files (PNG, JPG, WEBP) are allowed.', 'error');
+      return;
+    }
+
+    try {
+      app.showToast('Processing and resizing server icon...', 'info');
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 64;
+          canvas.height = 64;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 64, 64);
+
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              app.showToast('Failed to process image', 'error');
+              return;
+            }
+            const renamedFile = new File([blob], 'server-icon.png', { type: 'image/png' });
+            const formData = new FormData();
+            formData.append('file', renamedFile);
+            formData.append('directory', '');
+
+            await app.api(`/api/servers/${this.serverId}/files/upload`, {
+              method: 'POST',
+              body: formData
+            });
+
+            app.showToast('Server icon updated successfully (64x64 PNG)!', 'success');
+            const previewEl = document.getElementById('server-icon-preview');
+            if (previewEl) {
+              previewEl.src = `/api/servers/${this.serverId}/files/raw?path=server-icon.png&t=${Date.now()}`;
+            }
+          }, 'image/png');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      app.showToast('Failed to upload icon: ' + err.message, 'error');
+    }
+  }
+
+  // --------------------------------------------------
+  // FiveM Utilities (Arix Addon Pack v2.0.2)
+  // --------------------------------------------------
+  async handleFivemTxAdmin(enable) {
+    try {
+      const endpoint = enable ? `/api/servers/${this.serverId}/addons/fivem/txadmin/activate` : `/api/servers/${this.serverId}/addons/fivem/txadmin/deactivate`;
+      await app.api(endpoint, { method: 'POST' });
+      app.showToast(enable ? 'txAdmin activated!' : 'txAdmin deactivated.', 'success');
+      this.renderSettingsTab(document.getElementById('subtab-content-area'));
+    } catch (err) {
+      app.showToast(err.message, 'error');
+    }
+  }
+
+  async handleCleanFivemCache() {
+    const ok = await app.confirm({
+      tag: 'CLEAN CACHE',
+      tagIcon: 'trash-2',
+      title: 'Clean Cache',
+      badge: window.location.host,
+      message: 'Are you sure you want to clean the FiveM cache folder?',
+      subtext: 'Temporary runtime cache files will be wiped and freshly reconstructed on server boot.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Clean Cache',
+      type: 'warning'
+    });
+    if (!ok) return;
+    try {
+      await app.api(`/api/servers/${this.serverId}/addons/fivem/cache/clean`, { method: 'POST' });
+      app.showToast('FiveM cache cleaned successfully!', 'success');
+    } catch (err) {
+      app.showToast(err.message, 'error');
+    }
   }
 
   showAssignPortModal() {
@@ -2889,7 +3902,19 @@ class ServerConsole {
   }
 
   async handleUnassignPort(allocId) {
-    if (!confirm('Are you sure you want to unassign this port from the server?')) return;
+    const ok = await app.confirm({
+      tag: 'UNASSIGN PORT',
+      tagIcon: 'unlink',
+      title: 'Unassign Port',
+      badge: window.location.host,
+      message: 'Are you sure you want to unassign this port from the server?',
+      subtext: 'This will release the port and make it available for other servers.',
+      icon: 'unlink',
+      confirmIcon: 'unlink',
+      confirmText: 'Unassign Port',
+      type: 'fuchsia'
+    });
+    if (!ok) return;
     try {
       await app.api(`/api/servers/${this.serverId}/network/${allocId}`, { method: 'DELETE' });
       app.showToast('Port unassigned.', 'success');
@@ -2898,6 +3923,7 @@ class ServerConsole {
       app.showToast('Failed to unassign port: ' + err.message, 'error');
     }
   }
+
 }
 
 window.serverConsole = new ServerConsole();

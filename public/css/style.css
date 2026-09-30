@@ -62,10 +62,6 @@ body {
   -webkit-overflow-scrolling: touch !important;
 }
 
-#sidebar-system-footer {
-  flex-shrink: 0 !important;
-}
-
 #main-content {
   flex: 1 1 0% !important;
   min-height: 0 !important;
@@ -2012,21 +2008,11 @@ html.theme-arix .device-select-card.active {
 /* ==============================================================================
    🔒 PERMANENT NON-REMOVABLE DEVELOPER WATERMARK (NOBITA / NOBITAHOST.IN)
    ============================================================================== */
-#sidebar-permanent-watermark,
 #mpanel-global-footer-watermark {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-}
-
-#sidebar-permanent-watermark {
-  transition: all 0.2s ease-in-out;
-}
-
-#sidebar-permanent-watermark:hover {
-  border-color: rgba(192, 132, 252, 0.45) !important;
-  transform: translateY(-1px);
 }
 
 /* Discord Real-time Spotify Equalizer Animation */

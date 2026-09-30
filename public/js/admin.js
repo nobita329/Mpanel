@@ -528,6 +528,91 @@ class AdminManager {
           </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- MASS ACTIONS SECTION (from servers.zip: servers/index.blade.php) -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div id="adm-servers-mass-actions-panel" class="glass-panel p-5 rounded-3xl border border-cyan-500/30 bg-slate-950/60 shadow-2xl space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  Mass Actions Toolbar
+                </h3>
+                <p class="text-[11px] text-slate-400">Perform bulk operations on multiple servers simultaneously</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="ma-selected-count" class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                0 servers selected
+              </span>
+              <button type="button" onclick="admin.massSelectAllServers()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition">
+                Select All
+              </button>
+              <button type="button" onclick="admin.massDeselectAllServers()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-400 border border-white/10 transition">
+                Deselect All
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+            <!-- Action 1: Suspension -->
+            <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-2">
+              <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="pause-circle" class="w-3.5 h-3.5 text-amber-400"></i> Bulk Suspension
+              </h4>
+              <p class="text-[10px] text-slate-400">Suspend or unsuspend all checked server instances.</p>
+              <div class="flex items-center gap-2 pt-1">
+                <button id="ma-btn-suspend" onclick="admin.bulkSuspendServers()" disabled class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                  Suspend
+                </button>
+                <button id="ma-btn-unsuspend" onclick="admin.bulkUnsuspendServers()" disabled class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                  Unsuspend
+                </button>
+              </div>
+            </div>
+
+            <!-- Action 2: Deletion -->
+            <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-2">
+              <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i> Bulk Deletion
+              </h4>
+              <div class="flex items-center gap-1.5">
+                <input type="checkbox" id="ma-force-delete" class="rounded bg-slate-800 border-white/10 text-rose-500 focus:ring-0">
+                <label for="ma-force-delete" class="text-[10px] text-slate-400 cursor-pointer">Force delete (ignore errors)</label>
+              </div>
+              <div class="pt-1">
+                <button id="ma-btn-delete" onclick="admin.bulkDeleteServers()" disabled class="w-full py-1.5 px-3 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Selected
+                </button>
+              </div>
+            </div>
+
+            <!-- Action 3: Transfer to Node -->
+            <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-2">
+              <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="arrow-right-left" class="w-3.5 h-3.5 text-cyan-400"></i> Transfer to Node
+              </h4>
+              <div class="flex items-center gap-2">
+                <select id="ma-transfer-node" class="flex-1 glass-input px-2.5 py-1 rounded-xl text-xs bg-slate-900 text-slate-200">
+                  <option value="">Select destination node...</option>
+                </select>
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <label class="text-[10px] text-slate-400 flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" id="ma-transfer-backups" checked class="rounded bg-slate-800 border-white/10 text-cyan-500 focus:ring-0">
+                  Include backups
+                </label>
+                <button id="ma-btn-transfer" onclick="admin.bulkTransferServers()" disabled class="py-1 px-3 rounded-xl text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                  Transfer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ──────────────────────────────────────── -->
         <!-- 1. Server Section -->
         <!-- ──────────────────────────────────────── -->
@@ -591,13 +676,22 @@ class AdminManager {
     if (window.lucide) lucide.createIcons();
 
     try {
-      const [serversRes, usersRes] = await Promise.all([
+      const [serversRes, usersRes, nodesRes] = await Promise.all([
         app.api('/api/servers'),
-        app.api('/api/admin/users')
+        app.api('/api/admin/users'),
+        app.api('/api/admin/nodes')
       ]);
 
       let servers = serversRes.servers || [];
       const users = usersRes.users || [];
+      const nodes = nodesRes.nodes || [];
+
+      // Populate destination nodes in Mass Actions Toolbar
+      const nodeSelect = document.getElementById('ma-transfer-node');
+      if (nodeSelect) {
+        nodeSelect.innerHTML = `<option value="">Select destination node...</option>` +
+          nodes.map(n => `<option value="${n.id}">${app.escapeHtml(n.name)} (${n.fqdn})</option>`).join('');
+      }
 
       // Custom Server Sort Extension (customserversort.blueprint)
       if (window.customServerSort) {
@@ -683,6 +777,9 @@ class AdminManager {
                       <!-- 1. Server Name & Status -->
                       <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
+                          <div class="flex items-center pt-2.5 shrink-0">
+                            <input type="checkbox" class="server-mass-cb w-4 h-4 rounded bg-slate-800 border-white/20 text-cyan-500 cursor-pointer" data-id="${s.id}" onchange="admin.updateServerMassSelection()">
+                          </div>
                           ${window.customServerSort ? customServerSort.renderDragHandleHTML() : ''}
                           <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold shrink-0 mt-0.5 shadow-inner">
                             <i data-lucide="${s.server_type === 'minecraft' ? 'box' : (s.server_type === 'nodejs' ? 'file-code-2' : (s.server_type === 'lumenvm' || s.server_type === 'vm' || s.server_type === 'nokvm' || s.server_type === 'lumenvm_nokvm' ? 'server' : 'terminal'))}" class="w-5 h-5"></i>
@@ -790,7 +887,7 @@ class AdminManager {
                           <button onclick="admin.showEditServerModal(${s.id})" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 transition flex items-center gap-1" title="Edit Server Configuration">
                             <i data-lucide="sliders" class="w-3 h-3"></i> Edit
                           </button>
-                          <button onclick="admin.toggleServerSuspension(${s.id})" class="px-2 py-1 rounded-lg text-[10px] font-bold ${isSuspended ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/20 hover:bg-amber-500/30'} transition flex items-center gap-1" title="Toggle Auto-Suspension">
+                          <button onclick="admin.toggleServerSuspension(${s.id})" class="px-2 py-1 rounded-lg text-[10px] font-bold ${isSuspended ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/20 hover:bg-amber-500/30'} transition flex items-center gap-1" title="Toggle Auto-Suspension">
                             <i data-lucide="${isSuspended ? 'unlock' : 'pause-circle'}" class="w-3 h-3"></i> ${isSuspended ? 'Unsuspend' : 'Suspended'}
                           </button>
                           <button onclick="admin.resetServerResources(${s.id}, '${app.escapeHtml(s.name)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/20 transition flex items-center gap-1" title="Reset Custom Resources">
@@ -800,8 +897,8 @@ class AdminManager {
                       </div>
                     </div>
 
-                    <!-- 5. Actions Footer -->
-                    <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                    <!-- 5. Actions Footer (from servers.zip: Reinstall, Install toggle, Transfer to node) -->
+                    <div class="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
                       <div class="flex items-center gap-1.5">
                         <button onclick="admin.sendServerPower(${s.id}, 'start')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/20 transition" title="Start Server">
                           <i data-lucide="play" class="w-3.5 h-3.5"></i>
@@ -813,11 +910,20 @@ class AdminManager {
                           <i data-lucide="square" class="w-3.5 h-3.5"></i>
                         </button>
                       </div>
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <button onclick="admin.reinstallServer(${s.id})" class="px-2 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition text-[10px] font-bold flex items-center gap-1" title="Reinstall Server">
+                          <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reinstall
+                        </button>
+                        <button onclick="admin.toggleServerInstall(${s.id}, '${s.status}')" class="px-2 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition text-[10px] font-bold flex items-center gap-1" title="Toggle Install Status">
+                          <i data-lucide="check-circle-2" class="w-3 h-3"></i> ${s.status === 'installing' ? 'Installed' : 'Installing'}
+                        </button>
+                        <button onclick="admin.showTransferServerModal(${s.id}, '${app.escapeHtml(s.name)}')" class="px-2 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition text-[10px] font-bold flex items-center gap-1" title="Transfer to Node">
+                          <i data-lucide="arrow-right-left" class="w-3 h-3"></i> Transfer
+                        </button>
                         <button onclick="admin.deleteServer(${s.id}, '${app.escapeHtml(s.name)}')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/20 transition" title="Delete Server">
                           <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="app.navigate('server-manage/${s.id}/console')" class="btn-cyber px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-md">
+                        <button onclick="app.navigate('server-manage/${s.id}/console')" class="btn-cyber px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-md">
                           <i data-lucide="terminal" class="w-4 h-4"></i> Manage
                         </button>
                       </div>
@@ -835,6 +941,9 @@ class AdminManager {
                 <table class="w-full text-left text-xs text-slate-300">
                   <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-white/10">
                     <tr>
+                      <th class="px-3 py-3 w-10 text-center">
+                        <input type="checkbox" id="mass-select-all-cb" onchange="admin.toggleAllServerCbs(this.checked)" class="w-4 h-4 rounded bg-slate-800 border-white/20 text-cyan-500 cursor-pointer" title="Select All">
+                      </th>
                       <th class="px-4 py-3">Server Name</th>
                       <th class="px-4 py-3">IP Address</th>
                       <th class="px-4 py-3">User</th>
@@ -879,6 +988,11 @@ class AdminManager {
 
                       return `
                         <tr data-server-id="${s.id}" class="hover:bg-white/5 transition-colors">
+                          <!-- Checkbox -->
+                          <td class="px-3 py-3 text-center">
+                            <input type="checkbox" class="server-mass-cb w-4 h-4 rounded bg-slate-800 border-white/20 text-cyan-500 cursor-pointer" data-id="${s.id}" onchange="admin.updateServerMassSelection()">
+                          </td>
+
                           <!-- Server Name -->
                           <td class="px-4 py-3">
                             <div class="flex items-center gap-2.5">
@@ -968,6 +1082,15 @@ class AdminManager {
                               </button>
                               <button onclick="admin.sendServerPower(${s.id}, 'stop')" class="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/20 transition" title="Stop">
                                 <i data-lucide="square" class="w-3.5 h-3.5"></i>
+                              </button>
+                              <button onclick="admin.reinstallServer(${s.id})" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/20 transition" title="Reinstall Server">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                              </button>
+                              <button onclick="admin.toggleServerInstall(${s.id}, '${s.status}')" class="p-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/20 transition" title="Toggle Install Status">
+                                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                              </button>
+                              <button onclick="admin.showTransferServerModal(${s.id}, '${app.escapeHtml(s.name)}')" class="p-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/20 transition" title="Transfer to Node">
+                                <i data-lucide="arrow-right-left" class="w-3.5 h-3.5"></i>
                               </button>
                               <button onclick="app.navigate('server-manage/${s.id}/console')" class="btn-cyber px-2.5 py-1 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 shadow-sm" title="Manage Console">
                                 <i data-lucide="terminal" class="w-3 h-3"></i> Manage
@@ -1321,7 +1444,19 @@ class AdminManager {
   }
 
   async resetServerResources(serverId, serverName) {
-    if (!confirm(`Reset resources for server "${serverName}" back to baseline defaults (1024 MB RAM, 100% CPU, 5120 MB Disk)?`)) return;
+    const ok = await app.confirm({
+      tag: 'RESET RESOURCES',
+      tagIcon: 'refresh-cw',
+      title: 'Reset Server Limits',
+      badge: window.location.host,
+      message: `Reset resources for server "${serverName}" back to baseline defaults?`,
+      subtext: 'Limits will revert to 1024 MB RAM, 100% CPU, and 5120 MB Disk.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reset Limits',
+      type: 'warning'
+    });
+    if (!ok) return;
     await this.applyResourcePreset(serverId, 1024, 100, 5120);
   }
 
@@ -2690,13 +2825,17 @@ class AdminManager {
               const userServers = userServersMap[u.id] || [];
               const isAdm = u.role === 'admin';
               const isSuspended = !!u.suspended;
+              const isBanned = !!u.banned;
+              const clientFullName = [u.name_first, u.name_last].filter(Boolean).join(' ');
               const ramFmt = (u.total_memory_mb >= 1024 ? (u.total_memory_mb / 1024).toFixed(1) + ' GiB' : (u.total_memory_mb || 0) + ' MB');
               const diskFmt = (u.total_disk_mb >= 1024 ? (u.total_disk_mb / 1024).toFixed(1) + ' GiB' : (u.total_disk_mb || 0) + ' MB');
               const cpuFmt = (u.total_cpu_limit || 0) + '%';
 
               // Auto-suspend & Expiration status pill
               let autoSuspendStatusHTML = '';
-              if (isSuspended) {
+              if (isBanned) {
+                autoSuspendStatusHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600/30 text-rose-300 border border-rose-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>BANNED</span>`;
+              } else if (isSuspended) {
                 autoSuspendStatusHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>ACCOUNT SUSPENDED</span>`;
               } else if (u.suspended_server_count > 0) {
                 autoSuspendStatusHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>${u.suspended_server_count} Auto-Suspended</span>`;
@@ -2716,7 +2855,10 @@ class AdminManager {
                           ${(u.username || 'U').substring(0, 1)}
                         </div>
                         <div class="min-w-0">
-                          <h4 class="text-sm font-bold text-white truncate group-hover:text-purple-300 transition">${app.escapeHtml(u.username)}</h4>
+                          <div class="flex items-center gap-1.5">
+                            <h4 class="text-sm font-bold text-white truncate group-hover:text-purple-300 transition">${app.escapeHtml(u.username)}</h4>
+                            ${clientFullName ? `<span class="text-xs text-purple-300/80 font-medium truncate">(${app.escapeHtml(clientFullName)})</span>` : ''}
+                          </div>
                           <div class="flex items-center gap-1.5 font-mono text-[10px] text-slate-400">
                             <span class="text-slate-500">UID #${u.id}</span>
                             <span>•</span>
@@ -2735,9 +2877,15 @@ class AdminManager {
                     <!-- Permissions & State Badges -->
                     <div class="flex flex-wrap items-center gap-1.5 pt-1">
                       ${u.two_factor_enabled
-                        ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2FA Active</span>'
-                        : '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono text-slate-500 border border-white/5">No 2FA</span>'}
+                        ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> 2FA Active</span>'
+                        : '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono text-slate-500 border border-white/5 flex items-center gap-1"><i data-lucide="shield-off" class="w-3 h-3"></i> No 2FA</span>'}
                       ${autoSuspendStatusHTML}
+                    </div>
+
+                    <!-- Last Seen & IP -->
+                    <div class="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-between text-[10px] font-mono">
+                      <span class="text-slate-400 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-cyan-400"></i> Last Seen: <strong class="text-slate-200">${this.formatTimeAgo(u.last_login_at)}</strong></span>
+                      <span class="text-slate-500 truncate max-w-[120px]" title="${u.last_login_ip || 'No IP'}">${u.last_login_ip || 'No IP'}</span>
                     </div>
 
                     <!-- 2. Resources limit = me auto suspend Resources -->
@@ -2794,9 +2942,12 @@ class AdminManager {
 
                   <!-- 4. Actions Toolbar (User List == Create User, User delete, Edit User, Suspended User, Server Access) -->
                   <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-1.5">
-                    <div class="flex items-center gap-1">
-                      <button onclick="admin.showEditUserModal(${u.id})" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 flex items-center gap-1 transition" title="Edit User">
-                        <i data-lucide="edit-3" class="w-3 h-3 text-purple-400"></i> Edit User
+                    <div class="flex items-center gap-1 flex-wrap">
+                      <button onclick="admin.impersonateUser(${u.id}, '${app.escapeHtml(u.username)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1" title="Login as ${app.escapeHtml(u.username)}">
+                        <i data-lucide="log-in" class="w-3 h-3"></i> Login
+                      </button>
+                      <button onclick="admin.showEditUserModal(${u.id})" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 flex items-center gap-1 transition" title="Edit User">
+                        <i data-lucide="edit-3" class="w-3 h-3 text-purple-400"></i> Edit
                       </button>
                       <button onclick="admin.showUserServerAccessModal(${u.id}, '${app.escapeHtml(u.username)}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-white/10 transition" title="Server Access">
                         <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
@@ -2830,7 +2981,8 @@ class AdminManager {
                     <th class="px-4 py-3">User Profile</th>
                     <th class="px-4 py-3">Resources Limit</th>
                     <th class="px-4 py-3">Server Access</th>
-                    <th class="px-4 py-3">Permissions</th>
+                    <th class="px-4 py-3">2FA & Status</th>
+                    <th class="px-4 py-3">Last Seen</th>
                     <th class="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -2839,6 +2991,8 @@ class AdminManager {
                     const userServers = userServersMap[u.id] || [];
                     const isAdm = u.role === 'admin';
                     const isSuspended = !!u.suspended;
+                    const isBanned = !!u.banned;
+                    const clientFullName = [u.name_first, u.name_last].filter(Boolean).join(' ');
                     const ramFmt = (u.total_memory_mb >= 1024 ? (u.total_memory_mb / 1024).toFixed(1) + ' GiB' : (u.total_memory_mb || 0) + ' MB');
                     const diskFmt = (u.total_disk_mb >= 1024 ? (u.total_disk_mb / 1024).toFixed(1) + ' GiB' : (u.total_disk_mb || 0) + ' MB');
 
@@ -2851,7 +3005,10 @@ class AdminManager {
                               ${(u.username || 'U').substring(0, 1)}
                             </div>
                             <div class="min-w-0">
-                              <span class="font-bold text-white block text-xs truncate">${app.escapeHtml(u.username)}</span>
+                              <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-white block text-xs truncate">${app.escapeHtml(u.username)}</span>
+                                ${clientFullName ? `<span class="text-[10px] text-purple-300/80 truncate">(${app.escapeHtml(clientFullName)})</span>` : ''}
+                              </div>
                               <div class="flex items-center gap-1.5 font-mono text-[10px] text-slate-400">
                                 <span>UID #${u.id}</span>
                                 <span>•</span>
@@ -2887,22 +3044,37 @@ class AdminManager {
                           </div>
                         </td>
 
-                        <!-- Permissions -->
+                        <!-- 2FA & Status -->
                         <td class="px-4 py-3">
                           <div class="flex flex-wrap items-center gap-1.5">
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono ${isAdm ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-slate-800 text-slate-300 border border-white/10'}">
                               ${isAdm ? 'ADMIN' : 'CLIENT'}
                             </span>
-                            ${u.two_factor_enabled ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2FA</span>' : ''}
-                            ${isSuspended
-                              ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">SUSPENDED</span>'
-                              : '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400">ACTIVE</span>'}
+                            ${u.two_factor_enabled
+                              ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2FA</span>'
+                              : '<span class="px-1.5 py-0.2 rounded text-[9px] font-mono text-slate-500 border border-white/5">No 2FA</span>'}
+                            ${isBanned
+                              ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-600/30 text-rose-300 border border-rose-500/40">BANNED</span>'
+                              : (isSuspended
+                                ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">SUSPENDED</span>'
+                                : '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400">ACTIVE</span>')}
+                          </div>
+                        </td>
+
+                        <!-- Last Seen -->
+                        <td class="px-4 py-3 font-mono text-[10px]">
+                          <div class="space-y-0.5">
+                            <span class="text-slate-300 font-semibold block">${this.formatTimeAgo(u.last_login_at)}</span>
+                            <span class="text-slate-500 block truncate max-w-[100px]">${u.last_login_ip || 'No IP'}</span>
                           </div>
                         </td>
 
                         <!-- Actions -->
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                           <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="admin.impersonateUser(${u.id}, '${app.escapeHtml(u.username)}')" class="p-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition" title="Login as ${app.escapeHtml(u.username)}">
+                              <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                            </button>
                             <button onclick="admin.showEditUserModal(${u.id})" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-400 border border-white/10 transition" title="Edit User">
                               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                             </button>
@@ -2967,6 +3139,17 @@ class AdminManager {
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">First Name</label>
+                  <input type="text" id="edit-user-first-name" value="${app.escapeHtml(u.name_first || '')}" placeholder="John" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Last Name</label>
+                  <input type="text" id="edit-user-last-name" value="${app.escapeHtml(u.name_last || '')}" placeholder="Doe" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
                   <label class="block text-xs font-semibold text-slate-300 mb-1">Role Permissions</label>
                   <select id="edit-user-role" class="w-full glass-input px-3 py-2 rounded-xl text-xs">
                     <option value="user" ${u.role === 'user' ? 'selected' : ''}>Standard User</option>
@@ -2976,8 +3159,9 @@ class AdminManager {
                 <div>
                   <label class="block text-xs font-semibold text-slate-300 mb-1">Account State</label>
                   <select id="edit-user-suspended" class="w-full glass-input px-3 py-2 rounded-xl text-xs">
-                    <option value="0" ${!u.suspended ? 'selected' : ''}>Active</option>
-                    <option value="1" ${u.suspended ? 'selected' : ''}>Suspended</option>
+                    <option value="active" ${!u.suspended && !u.banned ? 'selected' : ''}>Active</option>
+                    <option value="suspended" ${u.suspended && !u.banned ? 'selected' : ''}>Suspended</option>
+                    <option value="banned" ${u.banned ? 'selected' : ''}>Banned</option>
                   </select>
                 </div>
               </div>
@@ -3005,11 +3189,15 @@ class AdminManager {
     e.preventDefault();
     const username = document.getElementById('edit-user-name').value.trim();
     const email = document.getElementById('edit-user-email').value.trim();
+    const name_first = document.getElementById('edit-user-first-name')?.value.trim() || '';
+    const name_last = document.getElementById('edit-user-last-name')?.value.trim() || '';
     const role = document.getElementById('edit-user-role').value;
-    const suspended = parseInt(document.getElementById('edit-user-suspended').value, 10);
+    const stateVal = document.getElementById('edit-user-suspended').value;
+    const suspended = stateVal === 'suspended' ? 1 : 0;
+    const banned = stateVal === 'banned' ? 1 : 0;
     const password = document.getElementById('edit-user-pass').value;
 
-    const payload = { username, email, role, suspended };
+    const payload = { username, email, role, suspended, banned, name_first, name_last };
     if (password && password.trim().length > 0) {
       payload.password = password.trim();
     }
@@ -3134,7 +3322,19 @@ class AdminManager {
   }
 
   async handleTransferServer(serverId, newUserId, username) {
-    if (!confirm(`Assign server #${serverId} to user "${username}"?`)) return;
+    const ok = await app.confirm({
+      tag: 'ASSIGN SERVER',
+      tagIcon: 'user',
+      title: 'Assign Server Ownership',
+      badge: window.location.host,
+      message: `Assign server #${serverId} to user "${username}"?`,
+      subtext: 'The server will be moved to this user account and inherit their permissions.',
+      icon: 'user',
+      confirmIcon: 'check',
+      confirmText: 'Assign Server',
+      type: 'info'
+    });
+    if (!ok) return;
     try {
       const res = await app.api(`/api/servers/${serverId}`, {
         method: 'PUT',
@@ -3161,6 +3361,16 @@ class AdminManager {
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Username</label>
             <input type="text" id="adm-new-user-name" placeholder="shadow" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs" required>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">First Name (optional)</label>
+              <input type="text" id="adm-new-user-first-name" placeholder="John" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Last Name (optional)</label>
+              <input type="text" id="adm-new-user-last-name" placeholder="Doe" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs">
+            </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
@@ -3189,6 +3399,8 @@ class AdminManager {
 
   async handleCreateUser() {
     const username = document.getElementById('adm-new-user-name').value.trim();
+    const name_first = document.getElementById('adm-new-user-first-name')?.value.trim() || '';
+    const name_last = document.getElementById('adm-new-user-last-name')?.value.trim() || '';
     const email = document.getElementById('adm-new-user-email').value.trim();
     const password = document.getElementById('adm-new-user-pass').value;
     const role = document.getElementById('adm-new-user-role').value;
@@ -3196,7 +3408,7 @@ class AdminManager {
     try {
       const data = await app.api('/api/admin/users', {
         method: 'POST',
-        body: JSON.stringify({ username, email, password, role })
+        body: JSON.stringify({ username, email, password, role, name_first, name_last })
       });
       if (data.success) {
         document.getElementById('modal-container').innerHTML = '';
@@ -3229,7 +3441,19 @@ class AdminManager {
   }
 
   async deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user? All their servers will be deleted as well.')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE USER',
+      tagIcon: 'trash-2',
+      title: 'Delete User Account',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this user?',
+      subtext: '⚠️ All servers, database assignments, and container instances owned by this user will also be deleted!',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete User',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/admin/users/${userId}`, { method: 'DELETE' });
       if (data.success) {
@@ -3243,6 +3467,56 @@ class AdminManager {
     } catch (err) {
       app.toast(err.message, 'error');
     }
+  }
+
+  async impersonateUser(userId, username) {
+    const ok = await app.confirm({
+      tag: 'SWITCH USER',
+      tagIcon: 'user',
+      title: 'Impersonate Account',
+      badge: window.location.host,
+      message: `Are you sure you want to log in as user "${username}"?`,
+      subtext: 'You will switch active session to their account. You can return to admin mode at any time.',
+      icon: 'user',
+      confirmIcon: 'check',
+      confirmText: 'Login as User',
+      type: 'info'
+    });
+    if (!ok) return;
+    try {
+      const currentToken = localStorage.getItem('token');
+      const currentUser = (app.user && app.user.username) ? app.user.username : 'Admin';
+      const res = await app.api(`/api/admin/users/${userId}/impersonate`, { method: 'POST' });
+      if (res.success && res.token) {
+        sessionStorage.setItem('mpanel_impersonating', 'true');
+        sessionStorage.setItem('impersonator_token', currentToken);
+        sessionStorage.setItem('impersonator_name', currentUser);
+        localStorage.setItem('token', res.token);
+        app.toast(`Switched account to ${username}. Reloading...`, 'success');
+        setTimeout(() => {
+          window.location.href = '/#servers';
+          window.location.reload();
+        }, 800);
+      }
+    } catch (err) {
+      app.toast(err.message || 'Failed to impersonate user', 'error');
+    }
+  }
+
+  formatTimeAgo(dateStr) {
+    if (!dateStr) return 'Never';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Never';
+    const now = new Date();
+    const diffSec = Math.floor((now.getTime() - d.getTime()) / 1000);
+    if (diffSec < 60) return 'Just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays < 30) return `${diffDays}d ago`;
+    return d.toLocaleDateString();
   }
 
   // 4. Nodes & Port Allocations View
@@ -3274,6 +3548,46 @@ class AdminManager {
             </button>
             <button onclick="admin.showCreateNodeModal()" class="btn-cyber px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Create Node
+            </button>
+          </div>
+        </div>
+
+        <!-- Wings Update Alert Banner Slot -->
+        <div id="adm-wings-update-banner" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shrink-0">
+              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-amber-300 flex items-center gap-2">
+                <span>Wings Daemon Update Available</span>
+                <span id="wings-update-version-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-200 border border-amber-500/40">v1.11.x</span>
+              </h4>
+              <p id="wings-update-desc" class="text-[11px] text-amber-200/80 mt-0.5">A new official release of the Wings daemon is ready for deployment.</p>
+            </div>
+          </div>
+          <a id="wings-release-link" href="https://github.com/pterodactyl/wings/releases" target="_blank" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 transition flex items-center gap-1.5 shrink-0">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> View Release
+          </a>
+        </div>
+
+        <!-- Cluster Mass Actions Bar (from nodes.zip) -->
+        <div class="glass-panel p-4 rounded-2xl border border-white/10 flex flex-wrap items-center justify-between gap-3 shadow-md bg-slate-900/60">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Cluster Mass Actions</h4>
+              <p class="text-[10px] text-slate-400">Broadcast administrative operations across all connected nodes</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="admin.massActionNodes('restart')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Restart Wings (All)
+            </button>
+            <button onclick="admin.massActionNodes('stop')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition flex items-center gap-1.5">
+              <i data-lucide="square" class="w-3.5 h-3.5"></i> Stop Wings (All)
             </button>
           </div>
         </div>
@@ -3323,6 +3637,7 @@ class AdminManager {
       console.error(e);
     }
     if (window.lucide) lucide.createIcons();
+    this.checkWingsUpdates();
   }
 
   _renderNodeCardHtml(n) {
@@ -3435,11 +3750,34 @@ class AdminManager {
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="pt-2 border-t border-white/10">
-        <button onclick="admin.showAllocationsModal(${n.id}, '${n.name}', '${n.fqdn}')" class="btn-cyber w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all">
-          <i data-lucide="radio" class="w-4 h-4"></i> Port Allocations
-        </button>
+      <!-- Action Buttons (from nodes.zip: Ports, Firewall, Wings & VPS, Logs, Backups) -->
+      <div class="pt-3 border-t border-white/10 space-y-2">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <button onclick="admin.showAllocationsModal(${n.id}, '${app.escapeHtml(n.name)}', '${n.fqdn}')" class="px-2 py-2 rounded-xl text-xs font-bold bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 flex items-center justify-center gap-1.5 transition" title="Manage Port Allocations">
+            <i data-lucide="radio" class="w-3.5 h-3.5"></i> Ports
+          </button>
+          <button onclick="admin.showNodeFirewallModal(${n.id}, '${app.escapeHtml(n.name)}')" class="px-2 py-2 rounded-xl text-xs font-bold bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 flex items-center justify-center gap-1.5 transition" title="nftables Firewall Manager">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i> Firewall
+          </button>
+          <button onclick="admin.showNodeWingsStatsModal(${n.id}, '${app.escapeHtml(n.name)}')" class="px-2 py-2 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 flex items-center justify-center gap-1.5 transition" title="Wings Daemon Stats & VPS Control">
+            <i data-lucide="activity" class="w-3.5 h-3.5"></i> Wings & VPS
+          </button>
+          <button onclick="admin.showNodeLogsModal(${n.id}, '${app.escapeHtml(n.name)}')" class="px-2 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 flex items-center justify-center gap-1.5 transition" title="Wings Daemon Logs">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Logs
+          </button>
+        </div>
+        <div class="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
+          <button onclick="admin.showNodeBackupsModal(${n.id}, '${app.escapeHtml(n.name)}')" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1.5 transition">
+            <i data-lucide="archive" class="w-3.5 h-3.5 text-cyan-400"></i> Node Backups
+          </button>
+          ${(!n.server_count || n.server_count === 0) ? `
+            <button onclick="admin.deleteNode(${n.id})" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/20 transition flex items-center gap-1.5">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Node
+            </button>
+          ` : `
+            <span class="text-[10px] text-slate-500 font-mono">${n.server_count} Active Instance(s)</span>
+          `}
+        </div>
       </div>
     </div>
     `;
@@ -3966,7 +4304,19 @@ class AdminManager {
   }
 
   async deleteAllocation(nodeId, allocId) {
-    if (!confirm('Are you sure you want to delete this port allocation?')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE PORT',
+      tagIcon: 'trash-2',
+      title: 'Delete Port Allocation',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this port allocation?',
+      subtext: 'This port will no longer be available for servers assigned to this node.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Port',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/admin/nodes/${nodeId}/allocations/${allocId}`, { method: 'DELETE' });
       if (data.success) {
@@ -3983,7 +4333,19 @@ class AdminManager {
   }
 
   async clearUnassignedAllocations(nodeId) {
-    if (!confirm('Are you sure you want to delete ALL free (unassigned) ports on this node?')) return;
+    const ok = await app.confirm({
+      tag: 'CLEAR FREE PORTS',
+      tagIcon: 'trash-2',
+      title: 'Clear Unassigned Ports',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete ALL free (unassigned) ports on this node?',
+      subtext: 'Only ports not bound to any server will be purged from database.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Clear Free Ports',
+      type: 'warning'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/admin/nodes/${nodeId}/allocations-clear-unassigned`, { method: 'DELETE' });
       if (data.success) {
@@ -3992,6 +4354,570 @@ class AdminManager {
       }
     } catch (err) {
       app.toast(err.message, 'error');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Extended Node Features (from nodes.zip: Firewall, Wings, Logs, Backups)
+  // ─────────────────────────────────────────────────────────────
+  async checkWingsUpdates() {
+    try {
+      const res = await app.api('/api/admin/nodes/updates');
+      if (res.success && res.update_available) {
+        const banner = document.getElementById('adm-wings-update-banner');
+        const badge = document.getElementById('wings-update-version-badge');
+        const desc = document.getElementById('wings-update-desc');
+        const link = document.getElementById('wings-release-link');
+        if (banner) banner.classList.remove('hidden');
+        if (badge) badge.innerText = `Current: v${res.current_version} ➔ Latest: v${res.latest_version}`;
+        if (desc) desc.innerText = `Update available: Wings v${res.latest_version} has been released.`;
+        if (link && res.release_url) link.href = res.release_url;
+      }
+    } catch (e) {
+      console.warn('Failed to check Wings updates:', e.message);
+    }
+  }
+
+  async massActionNodes(action) {
+    const ok = await app.confirm({
+      tag: 'BROADCAST ACTION',
+      tagIcon: 'radio',
+      title: 'Cluster Broadcast',
+      badge: window.location.host,
+      message: `Are you sure you want to broadcast "${action}" to all nodes in the cluster?`,
+      subtext: 'Command will be transmitted across all connected daemon endpoints.',
+      icon: 'radio',
+      confirmIcon: 'check',
+      confirmText: 'Broadcast Action',
+      type: 'warning'
+    });
+    if (!ok) return;
+    try {
+      const res = await app.api('/api/admin/nodes/mass-action', {
+        method: 'POST',
+        body: JSON.stringify({ action })
+      });
+      if (res.success) {
+        app.toast(res.message || `Mass action "${action}" completed.`, 'success');
+        this.renderNodesView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Mass action failed', 'error');
+    }
+  }
+
+  async showNodeFirewallModal(nodeId, nodeName) {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-3xl p-6 rounded-3xl border border-purple-500/30 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+          <div class="flex justify-between items-center border-b border-white/10 pb-3 shrink-0">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">
+                <i data-lucide="shield" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Firewall Manager: ${app.escapeHtml(nodeName)}</h3>
+                <p class="text-[11px] text-slate-400">nftables / iptables packet filter rules for this node host</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="admin.flushNodeFirewall(${nodeId}, '${app.escapeHtml(nodeName)}')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition flex items-center gap-1">
+                <i data-lucide="trash" class="w-3.5 h-3.5"></i> Flush All
+              </button>
+              <button onclick="document.getElementById('modal-container').innerHTML=''" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Add Rule Form -->
+          <form onsubmit="admin.handleAddFirewallRule(event, ${nodeId}, '${app.escapeHtml(nodeName)}')" class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3 shrink-0">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-purple-400"></i> Add Filter Rule
+              </h4>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1">Port</label>
+                <input type="number" id="fw-port" placeholder="25565" min="1" max="65535" required class="w-full glass-input px-2.5 py-1.5 rounded-xl text-xs font-mono">
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1">Protocol</label>
+                <select id="fw-proto" class="w-full glass-input px-2.5 py-1.5 rounded-xl text-xs bg-slate-900">
+                  <option value="tcp">TCP</option>
+                  <option value="udp">UDP</option>
+                  <option value="both">TCP & UDP</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1">Action</label>
+                <select id="fw-action" class="w-full glass-input px-2.5 py-1.5 rounded-xl text-xs bg-slate-900">
+                  <option value="ACCEPT">ACCEPT</option>
+                  <option value="DROP">DROP</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1">Target / Source IP</label>
+                <input type="text" id="fw-target-ip" placeholder="0.0.0.0/0" value="0.0.0.0/0" class="w-full glass-input px-2.5 py-1.5 rounded-xl text-xs font-mono">
+              </div>
+              <div class="flex items-end">
+                <button type="submit" class="btn-cyber-purple w-full py-1.5 rounded-xl text-xs font-bold">
+                  + Add Rule
+                </button>
+              </div>
+            </div>
+            <div>
+              <input type="text" id="fw-desc" placeholder="Rule description / notes (optional)" class="w-full glass-input px-2.5 py-1.5 rounded-xl text-xs">
+            </div>
+          </form>
+
+          <!-- Rules Table -->
+          <div class="flex-1 overflow-y-auto rounded-2xl border border-white/10 bg-slate-950/40">
+            <div id="fw-rules-target" class="p-4 text-center text-slate-400 text-xs">
+              <i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto mb-2 text-purple-400"></i> Loading firewall rules...
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    this.loadNodeFirewallRules(nodeId, nodeName);
+  }
+
+  async loadNodeFirewallRules(nodeId, nodeName) {
+    const target = document.getElementById('fw-rules-target');
+    if (!target) return;
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/firewall`);
+      const rules = res.rules || [];
+      if (rules.length === 0) {
+        target.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs">No active firewall rules configured. All traffic uses default policy (${res.default_policy || 'ACCEPT'}).</div>`;
+        return;
+      }
+      target.innerHTML = `
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-white/10">
+            <tr>
+              <th class="px-3 py-2.5">Port</th>
+              <th class="px-3 py-2.5">Protocol</th>
+              <th class="px-3 py-2.5">Action</th>
+              <th class="px-3 py-2.5">Target IP</th>
+              <th class="px-3 py-2.5">Description</th>
+              <th class="px-3 py-2.5 text-right">Delete</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 font-mono">
+            ${rules.map(r => `
+              <tr class="hover:bg-white/5 transition">
+                <td class="px-3 py-2 text-cyan-300 font-bold">${r.port}</td>
+                <td class="px-3 py-2 text-slate-300 uppercase">${r.protocol}</td>
+                <td class="px-3 py-2">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${r.action === 'ACCEPT' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">
+                    ${r.action}
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-slate-400">${app.escapeHtml(r.target_ip || 'Any')}</td>
+                <td class="px-3 py-2 font-sans text-slate-300 text-[11px]">${app.escapeHtml(r.description || '-')}</td>
+                <td class="px-3 py-2 text-right">
+                  <button onclick="admin.deleteNodeFirewallRule(${nodeId}, ${r.id}, '${app.escapeHtml(nodeName)}')" class="p-1 rounded-lg text-rose-400 hover:bg-rose-500/20 transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } catch (e) {
+      target.innerHTML = `<div class="p-6 text-center text-rose-400 text-xs">Failed to load firewall rules: ${e.message}</div>`;
+    }
+  }
+
+  async handleAddFirewallRule(e, nodeId, nodeName) {
+    e.preventDefault();
+    const port = parseInt(document.getElementById('fw-port').value, 10);
+    const protocol = document.getElementById('fw-proto').value;
+    const action = document.getElementById('fw-action').value;
+    const target_ip = document.getElementById('fw-target-ip').value.trim() || '0.0.0.0/0';
+    const description = document.getElementById('fw-desc').value.trim();
+
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/firewall/rule`, {
+        method: 'POST',
+        body: JSON.stringify({ port, protocol, action, target_ip, description })
+      });
+      if (res.success) {
+        app.toast('Firewall rule added successfully!', 'success');
+        document.getElementById('fw-port').value = '';
+        document.getElementById('fw-desc').value = '';
+        this.loadNodeFirewallRules(nodeId, nodeName);
+      }
+    } catch (err) {
+      app.toast(err.message || 'Failed to add rule', 'error');
+    }
+  }
+
+  async deleteNodeFirewallRule(nodeId, ruleId, nodeName) {
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/firewall/rule/${ruleId}`, { method: 'DELETE' });
+      if (res.success) {
+        app.toast('Rule removed.', 'info');
+        this.loadNodeFirewallRules(nodeId, nodeName);
+      }
+    } catch (err) {
+      app.toast(err.message || 'Failed to remove rule', 'error');
+    }
+  }
+
+  async flushNodeFirewall(nodeId, nodeName) {
+    const ok = await app.confirm({
+      tag: 'FLUSH FIREWALL',
+      tagIcon: 'shield',
+      title: 'Flush Firewall Rules',
+      badge: window.location.host,
+      message: `Flush all firewall rules for node "${nodeName}"?`,
+      subtext: 'Packet filter rules will be removed and node policies will revert to default.',
+      icon: 'shield',
+      confirmIcon: 'trash-2',
+      confirmText: 'Flush Rules',
+      type: 'warning'
+    });
+    if (!ok) return;
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/firewall/flush`, { method: 'POST' });
+      if (res.success) {
+        app.toast('Firewall rules flushed.', 'info');
+        this.loadNodeFirewallRules(nodeId, nodeName);
+      }
+    } catch (err) {
+      app.toast(err.message || 'Failed to flush firewall', 'error');
+    }
+  }
+
+  async showNodeWingsStatsModal(nodeId, nodeName) {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-2xl p-6 rounded-3xl border border-emerald-500/30 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                <i data-lucide="activity" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Wings & VPS Host: ${app.escapeHtml(nodeName)}</h3>
+                <p class="text-[11px] text-slate-400">Daemon telemetry, systemd controller, and host management</p>
+              </div>
+            </div>
+            <button onclick="document.getElementById('modal-container').innerHTML=''" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div id="wings-stats-target" class="py-12 text-center text-slate-400">
+            <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-400"></i>
+            <span>Fetching real-time Wings daemon & host statistics...</span>
+          </div>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/wings-stats`);
+      const target = document.getElementById('wings-stats-target');
+      if (!target || !res.success) return;
+
+      const d = res.daemon || {};
+      const sys = res.system || {};
+      const cpu = sys.cpu || {};
+      const mem = sys.memory || {};
+      const disk = sys.disk || {};
+      const dock = res.docker || {};
+      const containers = dock.containers || {};
+
+      target.innerHTML = `
+        <div class="space-y-4 text-left">
+          <!-- Wings Daemon Status Card -->
+          <div class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-500/20 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full ${d.status === 'running' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}"></span>
+                <span class="text-xs font-bold text-white">Wings Daemon</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">v${d.version || '1.11.x'}</span>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400">PID: ${d.pid || 1042}</span>
+            </div>
+
+            <!-- Service Controls -->
+            <div class="flex items-center gap-2 pt-1 border-t border-white/5 flex-wrap">
+              <button onclick="admin.nodeServiceAction(${nodeId}, 'restart')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Restart Wings
+              </button>
+              <button onclick="admin.nodeServiceAction(${nodeId}, 'start')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i> Start Wings
+              </button>
+              <button onclick="admin.nodeServiceAction(${nodeId}, 'stop')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition flex items-center gap-1.5">
+                <i data-lucide="square" class="w-3.5 h-3.5"></i> Stop Wings
+              </button>
+              <button onclick="admin.rebootNodeVps(${nodeId}, '${app.escapeHtml(nodeName)}')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600/30 hover:bg-rose-600/40 text-rose-200 border border-rose-500/40 transition flex items-center gap-1.5 ml-auto">
+                <i data-lucide="power" class="w-3.5 h-3.5"></i> Reboot VPS Host
+              </button>
+            </div>
+          </div>
+
+          <!-- Host Telemetry Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs">
+            <div class="p-3 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-sans">Operating System</span>
+              <p class="font-bold text-white text-xs truncate">${sys.os || 'Linux'}</p>
+              <p class="text-[10px] text-slate-500 truncate">${sys.kernel || ''}</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-sans">CPU Cores & Load</span>
+              <p class="font-bold text-purple-300">${cpu.count || 1} Cores (${cpu.usage_percent || 0}%)</p>
+              <p class="text-[10px] text-slate-500">Load: ${(sys.load_avg || []).join(' ')}</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-sans">Memory Used</span>
+              <p class="font-bold text-cyan-300">${((mem.used_mb || 0) / 1024).toFixed(1)} / ${((mem.total_mb || 0) / 1024).toFixed(1)} GB</p>
+              <p class="text-[10px] text-slate-500">${mem.percent || 0}% Allocated</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-sans">Disk Storage</span>
+              <p class="font-bold text-emerald-300">${disk.used_gb || 0} / ${disk.total_gb || 0} GB</p>
+              <p class="text-[10px] text-slate-500">${disk.percent || 0}% Used</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-sans">Docker Containers</span>
+              <p class="font-bold text-sky-300">${containers.running || 0} Active / ${containers.total || 0} Total</p>
+              <p class="text-[10px] text-slate-500">${dock.images || 0} Images</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-sans">Host Uptime</span>
+              <p class="font-bold text-amber-300">${Math.floor((sys.uptime_seconds || 0) / 3600)} Hours</p>
+              <p class="text-[10px] text-slate-500">${Math.floor(((sys.uptime_seconds || 0) % 3600) / 60)} Minutes</p>
+            </div>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } catch (e) {
+      const target = document.getElementById('wings-stats-target');
+      if (target) target.innerHTML = `<div class="p-6 text-center text-rose-400 text-xs">Failed to load Wings statistics: ${e.message}</div>`;
+    }
+  }
+
+  async nodeServiceAction(nodeId, action) {
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/service`, {
+        method: 'POST',
+        body: JSON.stringify({ action })
+      });
+      if (res.success) {
+        app.toast(res.message || `Wings service action "${action}" executed.`, 'success');
+        this.showNodeWingsStatsModal(nodeId, 'Node');
+      }
+    } catch (err) {
+      app.toast(err.message || 'Service action failed', 'error');
+    }
+  }
+
+  async rebootNodeVps(nodeId, nodeName) {
+    const ok = await app.confirm({
+      tag: 'REBOOT HOST',
+      tagIcon: 'alert-triangle',
+      title: 'Reboot VPS Host',
+      badge: window.location.host,
+      message: `Are you sure you want to reboot VPS host "${nodeName}"?`,
+      subtext: '⚠️ CRITICAL WARNING: All active servers running on this node will temporarily disconnect!',
+      icon: 'alert-triangle',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reboot Host',
+      type: 'danger'
+    });
+    if (!ok) return;
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/reboot-vps`, {
+        method: 'POST',
+        body: JSON.stringify({ confirm: true })
+      });
+      if (res.success) {
+        app.toast(res.message || 'Reboot signal dispatched to node host.', 'success');
+        document.getElementById('modal-container').innerHTML = '';
+      }
+    } catch (err) {
+      app.toast(err.message || 'Reboot failed', 'error');
+    }
+  }
+
+  async showNodeLogsModal(nodeId, nodeName) {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-4xl p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+          <div class="flex justify-between items-center border-b border-white/10 pb-3 shrink-0">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center font-bold">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Wings Logs: ${app.escapeHtml(nodeName)}</h3>
+                <p class="text-[11px] text-slate-400">Live output stream from /var/log/wings.log</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="admin.refreshNodeLogs(${nodeId})" class="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-white/10 transition" title="Refresh">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              </button>
+              <button onclick="document.getElementById('modal-container').innerHTML=''" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <input type="text" id="node-log-filter" placeholder="Filter log entries..." onkeyup="admin.filterNodeLogs()" class="flex-1 glass-input px-3 py-1.5 rounded-xl text-xs font-mono">
+            <select id="node-log-lines" onchange="admin.refreshNodeLogs(${nodeId})" class="glass-input px-3 py-1.5 rounded-xl text-xs bg-slate-900 font-mono">
+              <option value="50">50 lines</option>
+              <option value="100" selected>100 lines</option>
+              <option value="200">200 lines</option>
+              <option value="500">500 lines</option>
+            </select>
+          </div>
+
+          <div class="flex-1 overflow-y-auto rounded-2xl bg-black/80 border border-white/10 p-4 font-mono text-[11px] text-emerald-400 space-y-1" id="node-log-box">
+            <div class="text-center py-10 text-slate-500">Loading log entries...</div>
+          </div>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    this.refreshNodeLogs(nodeId);
+  }
+
+  async refreshNodeLogs(nodeId) {
+    const box = document.getElementById('node-log-box');
+    const lines = document.getElementById('node-log-lines')?.value || 100;
+    if (!box) return;
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/logs?lines=${lines}`);
+      if (res.success) {
+        this._currentRawNodeLogs = res.logs || 'No log entries recorded.';
+        this.filterNodeLogs();
+      }
+    } catch (e) {
+      box.innerHTML = `<span class="text-rose-400">Failed to load node logs: ${e.message}</span>`;
+    }
+  }
+
+  filterNodeLogs() {
+    const box = document.getElementById('node-log-box');
+    const query = document.getElementById('node-log-filter')?.value.toLowerCase() || '';
+    if (!box || !this._currentRawNodeLogs) return;
+
+    const rawLines = this._currentRawNodeLogs.split('\n');
+    const filtered = query ? rawLines.filter(l => l.toLowerCase().includes(query)) : rawLines;
+    box.innerHTML = filtered.map(l => {
+      let color = 'text-slate-300';
+      if (l.includes('[WARN]') || l.includes('WARNING')) color = 'text-amber-400';
+      else if (l.includes('[ERROR]') || l.includes('CRITICAL') || l.includes('FATAL')) color = 'text-rose-400';
+      else if (l.includes('[INFO]')) color = 'text-emerald-300';
+      return `<div class="${color} leading-relaxed">${app.escapeHtml(l)}</div>`;
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async showNodeBackupsModal(nodeId, nodeName) {
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-2xl p-6 rounded-3xl border border-cyan-500/30 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+          <div class="flex justify-between items-center border-b border-white/10 pb-3 shrink-0">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+                <i data-lucide="archive" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Backups on Node: ${app.escapeHtml(nodeName)}</h3>
+                <p class="text-[11px] text-slate-400">Total backup archives stored across instances on this node</p>
+              </div>
+            </div>
+            <button onclick="document.getElementById('modal-container').innerHTML=''" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div id="node-backups-target" class="flex-1 overflow-y-auto">
+            <div class="text-center py-10 text-slate-500">
+              <i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto mb-2 text-cyan-400"></i> Loading backups summary...
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+
+    try {
+      const res = await app.api(`/api/admin/nodes/${nodeId}/backups`);
+      const target = document.getElementById('node-backups-target');
+      if (!target || !res.success) return;
+
+      const backups = res.backups || [];
+      const totalMb = res.total_size_mb || 0;
+      const totalFmt = totalMb >= 1024 ? (totalMb / 1024).toFixed(2) + ' GB' : totalMb + ' MB';
+
+      target.innerHTML = `
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-3 text-center">
+            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/5 font-mono">
+              <span class="text-[10px] text-slate-400 uppercase font-sans block">Total Backups</span>
+              <span class="text-base font-bold text-white mt-1 block">${res.total_backups || backups.length}</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/5 font-mono">
+              <span class="text-[10px] text-slate-400 uppercase font-sans block">Backup Storage Used</span>
+              <span class="text-base font-bold text-cyan-300 mt-1 block">${totalFmt}</span>
+            </div>
+          </div>
+
+          ${backups.length === 0 ? `
+            <div class="p-8 text-center text-slate-500 text-xs">No server backups currently reside on this node host.</div>
+          ` : `
+            <div class="rounded-2xl border border-white/10 overflow-hidden bg-slate-950/40">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-white/10">
+                  <tr>
+                    <th class="px-3 py-2.5">Server</th>
+                    <th class="px-3 py-2.5">Backup Name</th>
+                    <th class="px-3 py-2.5 font-mono">Size</th>
+                    <th class="px-3 py-2.5 font-mono">Created</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 font-mono">
+                  ${backups.map(b => {
+                    const bSize = b.bytes ? (b.bytes / (1024 * 1024)).toFixed(1) + ' MB' : (b.size_mb ? b.size_mb + ' MB' : '-');
+                    return `
+                      <tr class="hover:bg-white/5 transition">
+                        <td class="px-3 py-2 text-white font-sans font-semibold">${app.escapeHtml(b.server_name || ('#' + b.server_id))}</td>
+                        <td class="px-3 py-2 text-slate-300 truncate max-w-xs">${app.escapeHtml(b.name || b.uuid || 'Backup')}</td>
+                        <td class="px-3 py-2 text-cyan-300">${bSize}</td>
+                        <td class="px-3 py-2 text-slate-400 text-[10px]">${b.created_at ? new Date(b.created_at).toLocaleDateString() : '-'}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } catch (e) {
+      const target = document.getElementById('node-backups-target');
+      if (target) target.innerHTML = `<div class="p-6 text-center text-rose-400 text-xs">Failed to load node backups: ${e.message}</div>`;
     }
   }
 
@@ -4103,7 +5029,19 @@ class AdminManager {
   }
 
   async deleteLocation(locId) {
-    if (!confirm('Are you sure you want to delete this location?')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE LOCATION',
+      tagIcon: 'map-pin',
+      title: 'Delete Location',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this location?',
+      subtext: 'Nodes and servers grouped under this datacenter location will need to be reassigned.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Location',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/admin/locations/${locId}`, { method: 'DELETE' });
       if (data.success) {
@@ -4239,7 +5177,19 @@ class AdminManager {
   }
 
   async deleteApiKey(keyId) {
-    if (!confirm('Are you sure you want to revoke this API key?')) return;
+    const ok = await app.confirm({
+      tag: 'REVOKE API KEY',
+      tagIcon: 'key',
+      title: 'Revoke API Key',
+      badge: window.location.host,
+      message: 'Are you sure you want to revoke this API key?',
+      subtext: 'External scripts, integrations, and bots using this key will immediately fail to authenticate.',
+      icon: 'key',
+      confirmIcon: 'trash-2',
+      confirmText: 'Revoke Key',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const data = await app.api(`/api/admin/api-keys/${keyId}`, { method: 'DELETE' });
       if (data.success) {
@@ -4402,9 +5352,19 @@ class AdminManager {
   }
 
   async deleteServer(serverId, serverName = '') {
-    if (!confirm(`⚠️ Are you sure you want to permanently delete server "${serverName || '#' + serverId}"? This action cannot be undone and will erase all container storage.`)) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'DELETE SERVER',
+      tagIcon: 'alert-triangle',
+      title: 'Permanent Delete Server',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently delete server "${serverName || '#' + serverId}"?`,
+      subtext: 'This action cannot be undone and will erase all container storage, volumes, and ports.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Server',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const res = await app.api(`/api/servers/${serverId}`, { method: 'DELETE' });
       if (res.success) {
@@ -4413,6 +5373,316 @@ class AdminManager {
       }
     } catch (err) {
       app.toast(err.message || 'Failed to delete server', 'error');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Server Mass Actions & Extended Controls (from servers.zip)
+  // ─────────────────────────────────────────────────────────────
+  massSelectAllServers() {
+    const cbs = document.querySelectorAll('.server-mass-cb');
+    cbs.forEach(cb => cb.checked = true);
+    const allCb = document.getElementById('mass-select-all-cb');
+    if (allCb) allCb.checked = true;
+    this.updateServerMassSelection();
+  }
+
+  massDeselectAllServers() {
+    const cbs = document.querySelectorAll('.server-mass-cb');
+    cbs.forEach(cb => cb.checked = false);
+    const allCb = document.getElementById('mass-select-all-cb');
+    if (allCb) allCb.checked = false;
+    this.updateServerMassSelection();
+  }
+
+  toggleAllServerCbs(checked) {
+    const cbs = document.querySelectorAll('.server-mass-cb');
+    cbs.forEach(cb => cb.checked = checked);
+    this.updateServerMassSelection();
+  }
+
+  getSelectedServerIds() {
+    const cbs = document.querySelectorAll('.server-mass-cb:checked');
+    const ids = [];
+    cbs.forEach(cb => {
+      const id = parseInt(cb.getAttribute('data-id'), 10);
+      if (id && !isNaN(id)) ids.push(id);
+    });
+    return ids;
+  }
+
+  updateServerMassSelection() {
+    const ids = this.getSelectedServerIds();
+    const count = ids.length;
+    const countBadge = document.getElementById('ma-selected-count');
+    if (countBadge) {
+      countBadge.innerText = `${count} ${count === 1 ? 'server' : 'servers'} selected`;
+    }
+
+    const btnSuspend = document.getElementById('ma-btn-suspend');
+    const btnUnsuspend = document.getElementById('ma-btn-unsuspend');
+    const btnDelete = document.getElementById('ma-btn-delete');
+    const btnTransfer = document.getElementById('ma-btn-transfer');
+
+    if (btnSuspend) btnSuspend.disabled = count === 0;
+    if (btnUnsuspend) btnUnsuspend.disabled = count === 0;
+    if (btnDelete) btnDelete.disabled = count === 0;
+    if (btnTransfer) btnTransfer.disabled = count === 0;
+
+    const allCb = document.getElementById('mass-select-all-cb');
+    const allBoxes = document.querySelectorAll('.server-mass-cb');
+    if (allCb && allBoxes.length > 0) {
+      allCb.checked = count === allBoxes.length;
+      allCb.indeterminate = count > 0 && count < allBoxes.length;
+    }
+  }
+
+  async bulkSuspendServers() {
+    const ids = this.getSelectedServerIds();
+    if (ids.length === 0) return;
+    const ok = await app.confirm({
+      tag: 'SUSPEND SERVERS',
+      tagIcon: 'pause',
+      title: 'Suspend Servers',
+      badge: window.location.host,
+      message: `Are you sure you want to suspend ${ids.length} selected server(s)?`,
+      subtext: 'Containers will be paused or halted and user access disabled.',
+      icon: 'pause',
+      confirmIcon: 'pause',
+      confirmText: 'Suspend Servers',
+      type: 'warning'
+    });
+    if (!ok) return;
+
+    try {
+      const res = await app.api('/api/admin/servers/bulk-suspend', {
+        method: 'POST',
+        body: JSON.stringify({ server_ids: ids })
+      });
+      if (res.success) {
+        app.toast(res.message || `Suspended ${res.count || ids.length} server(s).`, 'success');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Bulk suspend failed', 'error');
+    }
+  }
+
+  async bulkUnsuspendServers() {
+    const ids = this.getSelectedServerIds();
+    if (ids.length === 0) return;
+    const ok = await app.confirm({
+      tag: 'UNSUSPEND SERVERS',
+      tagIcon: 'play',
+      title: 'Unsuspend Servers',
+      badge: window.location.host,
+      message: `Are you sure you want to unsuspend ${ids.length} selected server(s)?`,
+      subtext: 'Server state and client power access will be restored.',
+      icon: 'play',
+      confirmIcon: 'play',
+      confirmText: 'Unsuspend Servers',
+      type: 'info'
+    });
+    if (!ok) return;
+
+    try {
+      const res = await app.api('/api/admin/servers/bulk-unsuspend', {
+        method: 'POST',
+        body: JSON.stringify({ server_ids: ids })
+      });
+      if (res.success) {
+        app.toast(res.message || `Unsuspended ${res.count || ids.length} server(s).`, 'success');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Bulk unsuspend failed', 'error');
+    }
+  }
+
+  async bulkDeleteServers() {
+    const ids = this.getSelectedServerIds();
+    if (ids.length === 0) return;
+    const force = !!document.getElementById('ma-force-delete')?.checked;
+
+    const ok = await app.confirm({
+      tag: 'MASS DELETE',
+      tagIcon: 'alert-triangle',
+      title: 'Bulk Delete Servers',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently delete ${ids.length} selected server(s)?`,
+      subtext: '⚠️ CRITICAL WARNING: This will destroy all container storage and cannot be undone!',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete All Selected',
+      type: 'danger'
+    });
+    if (!ok) return;
+
+    try {
+      const res = await app.api('/api/admin/servers/bulk-delete', {
+        method: 'POST',
+        body: JSON.stringify({ server_ids: ids, force })
+      });
+      if (res.success) {
+        app.toast(res.message || `Deleted ${res.count || ids.length} server(s).`, 'success');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Bulk delete failed', 'error');
+    }
+  }
+
+  async bulkTransferServers() {
+    const ids = this.getSelectedServerIds();
+    if (ids.length === 0) return;
+    const select = document.getElementById('ma-transfer-node');
+    const nodeId = select ? select.value : '';
+    if (!nodeId) {
+      app.toast('Please select a destination node first.', 'warning');
+      return;
+    }
+    const includeBackups = !!document.getElementById('ma-transfer-backups')?.checked;
+
+    const ok = await app.confirm({
+      tag: 'MIGRATE SERVERS',
+      tagIcon: 'send',
+      title: 'Bulk Transfer Servers',
+      badge: window.location.host,
+      message: `Transfer ${ids.length} server(s) to destination node?`,
+      subtext: 'Container volumes and configuration will be migrated to the target node.',
+      icon: 'send',
+      confirmIcon: 'check',
+      confirmText: 'Transfer Servers',
+      type: 'info'
+    });
+    if (!ok) return;
+
+    try {
+      const res = await app.api('/api/admin/servers/bulk-transfer', {
+        method: 'POST',
+        body: JSON.stringify({
+          server_ids: ids,
+          node_id: parseInt(nodeId, 10),
+          additional_data: { include_backups: includeBackups }
+        })
+      });
+      if (res.success) {
+        app.toast(res.message || `Transferred ${ids.length} server(s).`, 'success');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Bulk transfer failed', 'error');
+    }
+  }
+
+  async reinstallServer(serverId) {
+    const ok = await app.confirm({
+      tag: 'REINSTALL SERVER',
+      tagIcon: 'refresh-cw',
+      title: 'Reinstall Server',
+      badge: window.location.host,
+      message: `Reinstall server #${serverId}?`,
+      subtext: 'This will stop the server and overwrite local game/app files with fresh defaults.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reinstall Server',
+      type: 'warning'
+    });
+    if (!ok) return;
+
+    try {
+      const res = await app.api(`/api/servers/${serverId}/reinstall`, { method: 'POST' });
+      if (res.success) {
+        app.toast(res.message || 'Server reinstall dispatched.', 'success');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Reinstall failed', 'error');
+    }
+  }
+
+  async toggleServerInstall(serverId, currentStatus) {
+    try {
+      const res = await app.api(`/api/admin/servers/${serverId}/toggle-install`, { method: 'POST' });
+      if (res.success) {
+        app.toast(res.message || `Server status updated to: ${res.status}`, 'info');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Toggle install failed', 'error');
+    }
+  }
+
+  async showTransferServerModal(serverId, serverName) {
+    const modalContainer = document.getElementById('modal-container');
+    try {
+      const nodesRes = await app.api('/api/admin/nodes');
+      const nodes = nodesRes.nodes || [];
+
+      modalContainer.innerHTML = `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-cyan-500/30 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="arrow-right-left" class="w-5 h-5 text-cyan-400"></i> Transfer Server
+              </h3>
+              <button onclick="document.getElementById('modal-container').innerHTML=''" class="text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs text-slate-300">Migrate server <span class="font-bold text-cyan-300">"${app.escapeHtml(serverName)}"</span> to a different node host:</p>
+            <form onsubmit="admin.handleTransferServer(event, ${serverId})" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Destination Node</label>
+                <select id="transfer-server-node-id" class="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs bg-slate-900 text-slate-200" required>
+                  <option value="">Select destination node...</option>
+                  ${nodes.map(n => `<option value="${n.id}">${app.escapeHtml(n.name)} (${n.fqdn})</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-2">
+                <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" id="transfer-server-backups" checked class="rounded bg-slate-800 border-white/10 text-cyan-500">
+                  <span>Transfer existing backups with server</span>
+                </label>
+                <p class="text-[10px] text-slate-400">Backups will be linked to the new node location automatically.</p>
+              </div>
+
+              <div class="flex gap-2 pt-2">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" class="flex-1 py-2.5 rounded-xl text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold transition">Cancel</button>
+                <button type="submit" class="btn-cyber flex-1 py-2.5 rounded-xl text-xs font-bold shadow-md">Initiate Transfer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } catch (err) {
+      app.toast(err.message || 'Failed to load nodes', 'error');
+    }
+  }
+
+  async handleTransferServer(e, serverId) {
+    e.preventDefault();
+    const nodeId = document.getElementById('transfer-server-node-id')?.value;
+    if (!nodeId) return;
+    const includeBackups = !!document.getElementById('transfer-server-backups')?.checked;
+
+    try {
+      const res = await app.api(`/api/admin/servers/${serverId}/transfer`, {
+        method: 'POST',
+        body: JSON.stringify({
+          node_id: parseInt(nodeId, 10),
+          include_backups: includeBackups
+        })
+      });
+      if (res.success) {
+        document.getElementById('modal-container').innerHTML = '';
+        app.toast(res.message || 'Server transferred successfully!', 'success');
+        this.renderServersView();
+      }
+    } catch (err) {
+      app.toast(err.message || 'Transfer failed', 'error');
     }
   }
 
@@ -4660,7 +5930,19 @@ class AdminManager {
   }
 
   async deleteDatabaseHost(hostId) {
-    if (!confirm('Are you sure you want to delete this database host?')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE HOST',
+      tagIcon: 'database',
+      title: 'Delete Database Host',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this database host?',
+      subtext: 'Servers using this database host will lose MySQL connectivity.',
+      icon: 'database',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Host',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       await app.api(`/api/admin/databases/hosts/${hostId}`, { method: 'DELETE' });
       app.toast('Database host deleted.', 'success');
@@ -5110,9 +6392,19 @@ class AdminManager {
 
   async triggerAutoBackupsRunNow() {
     const runBtn = document.getElementById('btn-autobackup-run');
-    if (!confirm('Are you sure you want to trigger the automatic backup and retention cycle now across all eligible servers?')) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'TRIGGER BACKUP',
+      tagIcon: 'archive',
+      title: 'Run Backup Cycle',
+      badge: window.location.host,
+      message: 'Are you sure you want to trigger the automatic backup and retention cycle now across all eligible servers?',
+      subtext: 'Automated snapshots will be created and older backups pruned per policy.',
+      icon: 'archive',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Run Cycle Now',
+      type: 'info'
+    });
+    if (!ok) return;
 
     try {
       if (runBtn) {
@@ -5684,10 +6976,28 @@ class AdminManager {
       navigator.clipboard.writeText(uri).then(() => {
         app.toast('Callback URL copied to clipboard!', 'success');
       }).catch(() => {
-        prompt('Copy callback URL:', uri);
+        app.prompt({
+          tag: 'OAUTH CALLBACK',
+          tagIcon: 'globe',
+          title: 'Callback URL',
+          message: 'Copy the OAuth callback URL below:',
+          defaultValue: uri,
+          confirmText: 'Done',
+          confirmIcon: 'check',
+          type: 'info'
+        });
       });
     } else {
-      prompt('Copy callback URL:', uri);
+      app.prompt({
+        tag: 'OAUTH CALLBACK',
+        tagIcon: 'globe',
+        title: 'Callback URL',
+        message: 'Copy the OAuth callback URL below:',
+        defaultValue: uri,
+        confirmText: 'Done',
+        confirmIcon: 'check',
+        type: 'info'
+      });
     }
   }
 
@@ -5885,9 +7195,19 @@ class AdminManager {
   }
 
   async deleteSocialProvider(shortName, name) {
-    if (!confirm(`Are you sure you want to delete the ${name} (${shortName}) provider?\nExisting user connections will also be removed.`)) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'DELETE OAUTH',
+      tagIcon: 'trash-2',
+      title: 'Remove OAuth Provider',
+      badge: window.location.host,
+      message: `Are you sure you want to delete the ${name} (${shortName}) provider?`,
+      subtext: 'Existing linked user accounts will lose one-click social authentication.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Remove Provider',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     try {
       const res = await app.api(`/api/admin/sociallogin/providers/${shortName}`, {

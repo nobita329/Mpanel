@@ -472,8 +472,18 @@ class UniversalConfigEditor {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  promptCustomFile() {
-    const pathInput = prompt('Enter the relative path of the configuration file to open (e.g. plugins/Essentials/config.yml, paper.yml):');
+  async promptCustomFile() {
+    const pathInput = await app.prompt({
+      tag: 'CONFIG FILE',
+      tagIcon: 'file-text',
+      title: 'Open Config File',
+      message: 'Enter the relative path of the configuration file to open:',
+      placeholder: 'e.g. plugins/Essentials/config.yml, paper.yml',
+      defaultValue: '',
+      confirmText: 'Open File',
+      confirmIcon: 'file-text',
+      type: 'fuchsia'
+    });
     if (pathInput && pathInput.trim()) {
       this.loadFile(pathInput.trim());
     }
@@ -872,10 +882,30 @@ class UniversalConfigEditor {
     }
   }
 
-  promptAddProperty() {
-    const key = prompt('Enter new configuration property key:');
+  async promptAddProperty() {
+    const key = await app.prompt({
+      tag: 'NEW PROPERTY',
+      tagIcon: 'sliders',
+      title: 'Configuration Property',
+      message: 'Enter new configuration property key:',
+      placeholder: 'e.g. max-players, motd, enable-rcon',
+      defaultValue: '',
+      confirmText: 'Next',
+      confirmIcon: 'check',
+      type: 'fuchsia'
+    });
     if (!key || !key.trim()) return;
-    const val = prompt(`Enter value for ${key.trim()}:`, '');
+    const val = await app.prompt({
+      tag: 'PROPERTY VALUE',
+      tagIcon: 'sliders',
+      title: 'Property Value',
+      message: `Enter value for "${key.trim()}":`,
+      placeholder: 'Property value...',
+      defaultValue: '',
+      confirmText: 'Add Property',
+      confirmIcon: 'plus',
+      type: 'fuchsia'
+    });
 
     this.parsedItems.unshift({
       type: 'property',
@@ -934,7 +964,19 @@ class UniversalConfigEditor {
 
   async restartServer() {
     if (!this.currentServerId) return;
-    if (!confirm('Restart the server now to apply your configuration changes?')) return;
+    const ok = await app.confirm({
+      tag: 'RESTART SERVER',
+      tagIcon: 'refresh-cw',
+      title: 'Restart Server',
+      badge: window.location.host,
+      message: 'Restart the server now to apply your configuration changes?',
+      subtext: 'The server will briefly disconnect active players while restarting with new settings.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Restart Server',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     try {
       if (window.app && window.app.toast) app.toast('Restarting server...', 'info');

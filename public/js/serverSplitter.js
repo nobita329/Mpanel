@@ -795,10 +795,20 @@ class ServerSplitter {
   // Delete Split Server
   // ---------------------------------------------------------------------------
 
-  confirmDeleteSplit(splitId, splitName) {
-    if (!confirm(`Are you sure you want to delete split server "${splitName}"?\n\nThis will permanently delete the server files and return all allocated RAM, CPU, and Disk back to your master server pool.`)) {
-      return;
-    }
+  async confirmDeleteSplit(splitId, splitName) {
+    const ok = await app.confirm({
+      tag: 'DELETE SPLIT SERVER',
+      tagIcon: 'alert-triangle',
+      title: 'Delete Split Server',
+      badge: window.location.host,
+      message: `Are you sure you want to delete split server "${splitName}"?`,
+      subtext: 'This will permanently delete the server files and return all allocated RAM, CPU, and Disk back to your master server pool.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Split',
+      type: 'danger'
+    });
+    if (!ok) return;
     this.deleteSplit(splitId);
   }
 

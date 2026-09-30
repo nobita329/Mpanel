@@ -262,16 +262,23 @@ class VersionChanger {
       }
     } catch (e) {
       console.error('Failed to load jar types:', e);
-      // Fallback
       this.types = [
-        { id: 'paper', name: 'Paper', category: 'server', tag: 'Recommended', description: 'High-performance Spigot fork aimed at fixing gameplay inconsistencies.', icon: 'zap' },
-        { id: 'purpur', name: 'Purpur', category: 'server', tag: 'Popular', description: 'Drop-in replacement for Paper with maximum configurability.', icon: 'layers' },
-        { id: 'fabric', name: 'Fabric', category: 'modded', tag: 'Fast Modding', description: 'Lightweight, modular modding toolchain for Minecraft.', icon: 'box' },
-        { id: 'forge', name: 'Forge', category: 'modded', tag: 'Classic Mods', description: 'The traditional and most popular Minecraft modding platform.', icon: 'tool' },
-        { id: 'neoforge', name: 'NeoForge', category: 'modded', tag: 'Next-Gen', description: 'Community-driven fork of Minecraft Forge.', icon: 'flame' },
-        { id: 'vanilla', name: 'Vanilla', category: 'server', tag: 'Official', description: 'Official unmodified Minecraft server jar by Mojang.', icon: 'compass' },
-        { id: 'spigot', name: 'Spigot', category: 'server', tag: 'Standard', description: 'Classic modified server supporting Bukkit plugins.', icon: 'cpu' },
-        { id: 'velocity', name: 'Velocity', category: 'proxy', tag: 'Next-Gen Proxy', description: 'Modern, ultra-fast proxy server powered by PaperMC.', icon: 'shuffle' }
+        { id: 'paper', name: 'Paper', category: 'server', tag: 'Recommended', description: 'High-performance Spigot fork aimed at fixing gameplay inconsistencies.', icon: '/addons/paper.png' },
+        { id: 'purpur', name: 'Purpur', category: 'server', tag: 'Popular', description: 'Drop-in replacement for Paper with maximum configurability and unique gameplay mechanics.', icon: '/addons/purpur.png' },
+        { id: 'folia', name: 'Folia', category: 'server', tag: 'Multi-Threaded', description: 'Cutting-edge Paper fork that adds regional multithreading to Minecraft.', icon: '/addons/folia.png' },
+        { id: 'pufferfish', name: 'Pufferfish', category: 'server', tag: 'High-Performance', description: 'Optimized Paper fork for large servers with hundreds of players.', icon: '/addons/pufferfish.png' },
+        { id: 'fabric', name: 'Fabric', category: 'modded', tag: 'Fast Modding', description: 'Lightweight, modular modding toolchain for modern Minecraft.', icon: '/addons/fabric.png' },
+        { id: 'forge', name: 'Forge', category: 'modded', tag: 'Classic Mods', description: 'The traditional and most popular Minecraft modding platform.', icon: '/addons/forge.png' },
+        { id: 'neoforge', name: 'NeoForge', category: 'modded', tag: 'Next-Gen', description: 'Community-driven modern fork of Minecraft Forge for 1.20.2+.', icon: '/addons/neoforge.png' },
+        { id: 'quilt', name: 'Quilt', category: 'modded', tag: 'Modern', description: 'Next-generation modular and transparent modding ecosystem.', icon: '/addons/quilt.png' },
+        { id: 'arclight', name: 'Arclight', category: 'hybrid', tag: 'Hybrid', description: 'High-performance Bukkit/Spigot/Paper on Forge/Fabric.', icon: '/addons/arclight.png' },
+        { id: 'mohist', name: 'Mohist', category: 'hybrid', tag: 'Hybrid', description: 'Forge server implementation supporting Bukkit and Spigot plugins.', icon: '/addons/mohist.png' },
+        { id: 'spigot', name: 'Spigot', category: 'server', tag: 'Standard', description: 'Classic modified server supporting Bukkit plugins.', icon: '/addons/spigot.png' },
+        { id: 'craftbukkit', name: 'CraftBukkit', category: 'server', tag: 'Legacy', description: 'Original Bukkit server implementation.', icon: '/addons/craftbukkit.png' },
+        { id: 'vanilla', name: 'Vanilla', category: 'server', tag: 'Official', description: 'Official unmodified Minecraft server jar by Mojang.', icon: '/addons/vanilla.png' },
+        { id: 'velocity', name: 'Velocity', category: 'proxy', tag: 'Next-Gen Proxy', description: 'Modern, ultra-fast proxy server powered by PaperMC.', icon: '/addons/velocity.png' },
+        { id: 'bungeecord', name: 'BungeeCord', category: 'proxy', tag: 'Classic Proxy', description: 'The original proxy solution connecting multiple Minecraft servers.', icon: '/addons/bungeecord.png' },
+        { id: 'waterfall', name: 'Waterfall', category: 'proxy', tag: 'Bungee Fork', description: 'PaperMC upgrade to BungeeCord with improved stability and security.', icon: '/addons/waterfall.png' }
       ];
       this.renderEnginesGrid();
     }
@@ -324,8 +331,12 @@ class VersionChanger {
           ` : '')}
 
           <div class="flex items-center gap-3 mb-2.5">
-            <div class="p-2.5 rounded-xl ${isSelected ? 'bg-cyan-500/30 text-cyan-300' : 'bg-slate-800 text-slate-300 group-hover:text-cyan-400 group-hover:bg-slate-700'} transition">
-              <i data-lucide="${t.icon || 'box'}" class="w-5 h-5"></i>
+            <div class="w-10 h-10 rounded-xl ${isSelected ? 'bg-cyan-500/30 text-cyan-300' : 'bg-slate-800 text-slate-300 group-hover:bg-slate-700'} flex items-center justify-center p-1.5 overflow-hidden transition shrink-0">
+              ${t.icon && (t.icon.startsWith('/') || t.icon.endsWith('.png')) ? `
+                <img src="${t.icon}" alt="${t.name}" class="w-full h-full object-contain" />
+              ` : `
+                <i data-lucide="${t.icon || 'box'}" class="w-5 h-5"></i>
+              `}
             </div>
             <div>
               <h5 class="text-sm font-bold text-white group-hover:text-cyan-300 transition">${t.name}</h5>
@@ -627,12 +638,19 @@ class VersionChanger {
     const engineName = this.selectedType.toUpperCase();
     const ver = this.selectedVersion;
 
-    const isRunning = this.serverData.status === 'running';
-    const confirmMsg = isRunning
-      ? `Switch server #${this.currentServerId} to ${engineName} (${ver})?\n\n⚠️ The server is currently running and will be stopped before applying the new version.`
-      : `Switch server #${this.currentServerId} to ${engineName} (${ver})?`;
-
-    if (!confirm(confirmMsg)) return;
+    const ok = await app.confirm({
+      tag: 'VERSION CHANGER',
+      tagIcon: 'refresh-cw',
+      title: 'Change Engine Version',
+      badge: window.location.host,
+      message: `Switch server #${this.currentServerId} to ${engineName} (${ver})?`,
+      subtext: isRunning ? 'The server is currently running and will be stopped before applying the new version.' : 'New runtime binaries will be downloaded and configured.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Apply Version',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     this.isInstalling = true;
     if (btn) {

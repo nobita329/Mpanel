@@ -1084,6 +1084,158 @@ class SettingsManager {
               </div>
             </div>
 
+            <!-- Card 5: Core Panel & Security Policies (from settings.zip) -->
+            <div class="glass-panel p-6 rounded-3xl border border-white/10 space-y-5">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                  <i data-lucide="sliders" class="w-4 h-4 text-purple-400"></i> Core Panel & Security Policies
+                </h3>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20">Security</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Company / Organization Name</label>
+                  <input type="text" id="set-company-name" class="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs" placeholder="Mpanel Game Host">
+                  <p class="text-[10px] text-slate-400 mt-1">Used throughout panel headers and notification communications.</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Default UI Language</label>
+                  <select id="set-default-language" class="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs bg-slate-900 text-slate-200">
+                    <option value="en">English (US/UK)</option>
+                    <option value="es">Español (Spanish)</option>
+                    <option value="de">Deutsch (German)</option>
+                    <option value="fr">Français (French)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="ru">Русский (Russian)</option>
+                    <option value="pt">Português (Portuguese)</option>
+                    <option value="ja">日本語 (Japanese)</option>
+                    <option value="zh">中文 (Chinese)</option>
+                    <option value="ar">العربية (Arabic)</option>
+                  </select>
+                  <p class="text-[10px] text-slate-400 mt-1">Default language for panel interface components.</p>
+                </div>
+              </div>
+
+              <!-- 2FA Requirement -->
+              <div class="pt-3 border-t border-white/5 space-y-2">
+                <label class="block text-xs font-semibold text-slate-300">Require 2-Factor Authentication (2FA)</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" id="btn-2fa-0" onclick="settingsManager.setTwoFaReq('0')" class="px-3 py-2 rounded-xl text-xs font-semibold border text-center transition bg-cyan-500/20 text-cyan-300 border-cyan-500/40">
+                    Not Required
+                  </button>
+                  <button type="button" id="btn-2fa-1" onclick="settingsManager.setTwoFaReq('1')" class="px-3 py-2 rounded-xl text-xs font-semibold border text-center transition bg-slate-800/60 text-slate-400 border-white/5 hover:text-white">
+                    Admin Only
+                  </button>
+                  <button type="button" id="btn-2fa-2" onclick="settingsManager.setTwoFaReq('2')" class="px-3 py-2 rounded-xl text-xs font-semibold border text-center transition bg-slate-800/60 text-slate-400 border-white/5 hover:text-white">
+                    All Users
+                  </button>
+                </div>
+                <input type="hidden" id="set-twofa-requirement" value="0">
+                <p class="text-[10px] text-slate-400">If enabled, accounts in the selected group must configure 2FA to access the panel.</p>
+              </div>
+
+              <!-- Admin Theme -->
+              <div class="pt-3 border-t border-white/5 space-y-2">
+                <label class="block text-xs font-semibold text-slate-300">Admin Panel Theme</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <div id="card-adm-theme-default" onclick="settingsManager.setAdminTheme('default')" class="cursor-pointer p-3.5 rounded-2xl border bg-cyan-500/10 border-cyan-500/30 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                        <i data-lucide="layout" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-bold text-white">Default Admin</h5>
+                        <p class="text-[10px] text-slate-400">Standard cyber glass admin</p>
+                      </div>
+                    </div>
+                    <span id="badge-adm-theme-default" class="text-[10px] font-bold text-cyan-400">✓ Active</span>
+                  </div>
+
+                  <div id="card-adm-theme-hyperv1" onclick="settingsManager.setAdminTheme('hyperv1')" class="cursor-pointer p-3.5 rounded-2xl border bg-slate-900/40 border-white/5 hover:border-purple-500/30 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-bold text-white">Hyperv1 Theme</h5>
+                        <p class="text-[10px] text-slate-400">Hyper-optimized neon violet admin</p>
+                      </div>
+                    </div>
+                    <span id="badge-adm-theme-hyperv1" class="text-[10px] font-bold text-slate-500">Select</span>
+                  </div>
+                </div>
+                <input type="hidden" id="set-admin-theme" value="default">
+              </div>
+            </div>
+
+            <!-- Card 6: Advanced System, Network & reCAPTCHA Settings (from settings.zip) -->
+            <div class="glass-panel p-6 rounded-3xl border border-white/10 space-y-5">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Advanced System & reCAPTCHA
+                </h3>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">Advanced</span>
+              </div>
+
+              <!-- reCAPTCHA Config -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-white">Google reCAPTCHA v2 / v3</h4>
+                    <p class="text-[11px] text-slate-400">Enable invisible or visible captcha check on authentication forms</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="set-recaptcha-enabled" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">reCAPTCHA Site Key</label>
+                    <input type="text" id="set-recaptcha-site-key" class="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs" placeholder="6LeIx0bAAAAA...">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">reCAPTCHA Secret Key</label>
+                    <input type="password" id="set-recaptcha-secret-key" class="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs" placeholder="••••••••••••••••••••••••••">
+                  </div>
+                </div>
+              </div>
+
+              <!-- HTTP Connections Timeout -->
+              <div class="pt-3 border-t border-white/5 space-y-3">
+                <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-400"></i> HTTP Connection Timeouts
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Connection Timeout (Seconds)</label>
+                    <input type="number" id="set-http-connect-timeout" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs" value="30" min="1" max="300">
+                    <p class="text-[10px] text-slate-400 mt-1">Seconds to wait for a connection to be opened before timing out.</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Request Timeout (Seconds)</label>
+                    <input type="number" id="set-http-request-timeout" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs" value="60" min="1" max="600">
+                    <p class="text-[10px] text-slate-400 mt-1">Seconds to wait for a full request response before throwing an error.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Automatic Allocation Creation -->
+              <div class="flex items-center justify-between pt-3 border-t border-white/5">
+                <div>
+                  <h4 class="text-xs font-bold text-white">Automatic Port Allocation Creation</h4>
+                  <p class="text-[11px] text-slate-400">Allow users to automatically allocate free node network ports for their servers</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="set-auto-allocation-enabled" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                </label>
+              </div>
+            </div>
+
             <!-- Save Action Button -->
             <button onclick="settingsManager.saveSettings()" class="btn-cyber w-full py-4 rounded-2xl text-sm font-bold shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-2">
               <i data-lucide="save" class="w-4 h-4"></i> Save All Customization Settings
@@ -1291,9 +1443,86 @@ class SettingsManager {
         }
       }
 
+      // Basic & Advanced settings from settings.zip
+      if (s.company_name) {
+        const el = document.getElementById('set-company-name');
+        if (el) el.value = s.company_name;
+      }
+      if (s.default_language) {
+        const el = document.getElementById('set-default-language');
+        if (el) el.value = s.default_language;
+      }
+      if (s.two_factor_requirement !== undefined) {
+        this.setTwoFaReq(String(s.two_factor_requirement));
+      }
+      if (s.admin_theme) {
+        this.setAdminTheme(s.admin_theme);
+      }
+      if (s.recaptcha_enabled !== undefined) {
+        const el = document.getElementById('set-recaptcha-enabled');
+        if (el) el.checked = s.recaptcha_enabled === 'true' || s.recaptcha_enabled === '1';
+      }
+      if (s.recaptcha_site_key !== undefined) {
+        const el = document.getElementById('set-recaptcha-site-key');
+        if (el) el.value = s.recaptcha_site_key;
+      }
+      if (s.recaptcha_secret_key !== undefined) {
+        const el = document.getElementById('set-recaptcha-secret-key');
+        if (el) el.value = s.recaptcha_secret_key;
+      }
+      if (s.http_connect_timeout !== undefined) {
+        const el = document.getElementById('set-http-connect-timeout');
+        if (el) el.value = s.http_connect_timeout;
+      }
+      if (s.http_request_timeout !== undefined) {
+        const el = document.getElementById('set-http-request-timeout');
+        if (el) el.value = s.http_request_timeout;
+      }
+      if (s.auto_allocation_enabled !== undefined) {
+        const el = document.getElementById('set-auto-allocation-enabled');
+        if (el) el.checked = s.auto_allocation_enabled !== 'false' && s.auto_allocation_enabled !== '0';
+      }
+
       this.updatePreviewCards();
     } catch (err) {
       console.error('Failed to load admin settings:', err);
+    }
+  }
+
+  setTwoFaReq(val) {
+    const hidden = document.getElementById('set-twofa-requirement');
+    if (hidden) hidden.value = val;
+    ['0', '1', '2'].forEach(v => {
+      const btn = document.getElementById(`btn-2fa-${v}`);
+      if (btn) {
+        if (v === val) {
+          btn.className = 'px-3 py-2 rounded-xl text-xs font-semibold border text-center transition bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
+        } else {
+          btn.className = 'px-3 py-2 rounded-xl text-xs font-semibold border text-center transition bg-slate-800/60 text-slate-400 border-white/5 hover:text-white';
+        }
+      }
+    });
+  }
+
+  setAdminTheme(theme) {
+    const hidden = document.getElementById('set-admin-theme');
+    if (hidden) hidden.value = theme;
+    const cardDef = document.getElementById('card-adm-theme-default');
+    const cardHyp = document.getElementById('card-adm-theme-hyperv1');
+    const badgeDef = document.getElementById('badge-adm-theme-default');
+    const badgeHyp = document.getElementById('badge-adm-theme-hyperv1');
+    if (theme === 'hyperv1') {
+      if (cardHyp) cardHyp.className = 'cursor-pointer p-3.5 rounded-2xl border bg-purple-500/20 border-purple-500/50 flex items-center justify-between';
+      if (cardDef) cardDef.className = 'cursor-pointer p-3.5 rounded-2xl border bg-slate-900/40 border-white/5 hover:border-cyan-500/30 flex items-center justify-between';
+      if (badgeHyp) { badgeHyp.innerText = '✓ Active'; badgeHyp.className = 'text-[10px] font-bold text-purple-400'; }
+      if (badgeDef) { badgeDef.innerText = 'Select'; badgeDef.className = 'text-[10px] font-bold text-slate-500'; }
+      document.body.classList.add('theme-hyperv1-admin');
+    } else {
+      if (cardDef) cardDef.className = 'cursor-pointer p-3.5 rounded-2xl border bg-cyan-500/20 border-cyan-500/50 flex items-center justify-between';
+      if (cardHyp) cardHyp.className = 'cursor-pointer p-3.5 rounded-2xl border bg-slate-900/40 border-white/5 hover:border-purple-500/30 flex items-center justify-between';
+      if (badgeDef) { badgeDef.innerText = '✓ Active'; badgeDef.className = 'text-[10px] font-bold text-cyan-400'; }
+      if (badgeHyp) { badgeHyp.innerText = 'Select'; badgeHyp.className = 'text-[10px] font-bold text-slate-500'; }
+      document.body.classList.remove('theme-hyperv1-admin');
     }
   }
 
@@ -2236,9 +2465,19 @@ class SettingsManager {
   }
 
   async resetToDefault() {
-    if (!confirm('Are you sure you want to reset all theme and customization settings to original defaults?')) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'RESET THEME',
+      tagIcon: 'refresh-cw',
+      title: 'Reset Theme',
+      badge: window.location.host,
+      message: 'Are you sure you want to reset all theme and customization settings to original defaults?',
+      subtext: 'Your current branding, colors, background wallpaper and styling preferences will be reset.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reset Defaults',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     try {
       app.toast('Resetting theme to default...', 'info');
@@ -2272,7 +2511,17 @@ class SettingsManager {
       nebula_config: JSON.stringify(window.nebulaEditor ? window.nebulaEditor.config : {}),
       registration_enabled: document.getElementById('set-registration')?.checked ? '1' : '0',
       tutorials_enabled: document.getElementById('set-tutorials-enabled')?.checked ? '1' : '0',
-      tutorials_autostart_enabled: document.getElementById('set-tutorials-autostart-enabled')?.checked ? '1' : '0'
+      tutorials_autostart_enabled: document.getElementById('set-tutorials-autostart-enabled')?.checked ? '1' : '0',
+      company_name: document.getElementById('set-company-name')?.value.trim() || 'Mpanel',
+      two_factor_requirement: document.getElementById('set-twofa-requirement')?.value || '0',
+      default_language: document.getElementById('set-default-language')?.value || 'en',
+      admin_theme: document.getElementById('set-admin-theme')?.value || 'default',
+      recaptcha_enabled: document.getElementById('set-recaptcha-enabled')?.checked ? 'true' : 'false',
+      recaptcha_site_key: document.getElementById('set-recaptcha-site-key')?.value.trim() || '',
+      recaptcha_secret_key: document.getElementById('set-recaptcha-secret-key')?.value.trim() || '',
+      http_connect_timeout: document.getElementById('set-http-connect-timeout')?.value || '30',
+      http_request_timeout: document.getElementById('set-http-request-timeout')?.value || '60',
+      auto_allocation_enabled: document.getElementById('set-auto-allocation-enabled')?.checked ? 'true' : 'false'
     };
 
     try {

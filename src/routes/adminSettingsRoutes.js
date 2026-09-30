@@ -109,7 +109,17 @@ router.put('/', authenticate, requireAdmin, async (req, res) => {
       'liquidx_primary_color',
       'tutorials_enabled',
       'tutorials_autostart_enabled',
-      'nebula_config'
+      'nebula_config',
+      'company_name',
+      'two_factor_requirement',
+      'default_language',
+      'admin_theme',
+      'recaptcha_enabled',
+      'recaptcha_site_key',
+      'recaptcha_secret_key',
+      'http_connect_timeout',
+      'http_request_timeout',
+      'auto_allocation_enabled'
     ];
 
     for (const [key, value] of Object.entries(updates)) {

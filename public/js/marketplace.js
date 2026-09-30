@@ -329,32 +329,38 @@ class MarketplaceController {
 
         <!-- Dedicated Category Tabs ("sab alg alg") -->
         <div class="glass-panel p-2 rounded-2xl border border-white/10 flex flex-wrap gap-2">
-          <button onclick="marketplace.switchCategory('version-changer')" id="cat-btn-version-changer" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'version-changer' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
-            <i data-lucide="refresh-cw" class="w-4 h-4 text-cyan-400"></i> Version Changer
-          </button>
-          <button onclick="marketplace.switchCategory('players')" id="cat-btn-players" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'players' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
-            <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i> Player Manager
-          </button>
-          <button onclick="marketplace.switchCategory('world')" id="cat-btn-world" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'world' ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
-            <i data-lucide="globe" class="w-4 h-4 text-teal-400"></i> World Manager
-          </button>
           <button onclick="marketplace.switchCategory('plugin')" id="cat-btn-plugin" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'plugin' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
             <i data-lucide="puzzle" class="w-4 h-4 text-cyan-400"></i> Plugins
           </button>
           <button onclick="marketplace.switchCategory('mod')" id="cat-btn-mod" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'mod' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
             <i data-lucide="box" class="w-4 h-4 text-purple-400"></i> Mods
           </button>
+          <button onclick="marketplace.switchCategory('properties')" id="cat-btn-properties" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'properties' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i> Properties
+          </button>
+          <button onclick="marketplace.switchCategory('players')" id="cat-btn-players" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'players' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i> Players
+          </button>
+          <button onclick="marketplace.switchCategory('importer')" id="cat-btn-importer" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'importer' ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="download-cloud" class="w-4 h-4 text-amber-400"></i> Importer
+          </button>
+          <button onclick="marketplace.switchCategory('splitter')" id="cat-btn-splitter" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'splitter' ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="git-fork" class="w-4 h-4 text-violet-400"></i> Splitter
+          </button>
+          <button onclick="marketplace.switchCategory('version-changer')" id="cat-btn-version-changer" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'version-changer' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-cyan-400"></i> Versions
+          </button>
+          <button onclick="marketplace.switchCategory('world')" id="cat-btn-world" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'world' ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="globe" class="w-4 h-4 text-teal-400"></i> Worlds
+          </button>
+          <button onclick="marketplace.switchCategory('modpack')" id="cat-btn-modpack" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'modpack' ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
+            <i data-lucide="archive" class="w-4 h-4 text-rose-400"></i> Modpacks
+          </button>
           <button onclick="marketplace.switchCategory('datapack')" id="cat-btn-datapack" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'datapack' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
             <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> Datapacks
           </button>
           <button onclick="marketplace.switchCategory('resourcepack')" id="cat-btn-resourcepack" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'resourcepack' ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
             <i data-lucide="palette" class="w-4 h-4 text-amber-400"></i> Resource Packs
-          </button>
-          <button onclick="marketplace.switchCategory('modpack')" id="cat-btn-modpack" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'modpack' ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
-            <i data-lucide="archive" class="w-4 h-4 text-rose-400"></i> Modpacks
-          </button>
-          <button onclick="marketplace.switchCategory('properties')" id="cat-btn-properties" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'properties' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
-            <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i> Config Editor
           </button>
           <button onclick="marketplace.switchCategory('tools')" id="cat-btn-tools" class="cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${this.activeTab === 'tools' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-800/60 text-slate-300 hover:bg-white/10'}">
             <i data-lucide="wrench" class="w-4 h-4 text-indigo-400"></i> Server Tools
@@ -380,6 +386,9 @@ class MarketplaceController {
     if (category === 'worlds') category = 'world';
     if (category === 'player') category = 'players';
     if (category === 'version') category = 'version-changer';
+    if (category === 'property' || category === 'config') category = 'properties';
+    if (category === 'import') category = 'importer';
+    if (category === 'split') category = 'splitter';
 
     // Stop live auto sync on player manager if leaving players
     if (this.activeTab === 'players' && category !== 'players' && window.playerManager) {
@@ -404,14 +413,17 @@ class MarketplaceController {
       const colors = {
         'version-changer': 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20',
         players: 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20',
+        properties: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20',
+        importer: 'bg-amber-600 text-white shadow-lg shadow-amber-600/20',
+        splitter: 'bg-violet-600 text-white shadow-lg shadow-violet-600/20',
         world: 'bg-teal-500 text-white shadow-lg shadow-teal-500/20',
         plugin: 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20',
         mod: 'bg-purple-600 text-white shadow-lg shadow-purple-500/20',
         datapack: 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20',
         resourcepack: 'bg-amber-600 text-white shadow-lg shadow-amber-500/20',
         modpack: 'bg-rose-600 text-white shadow-lg shadow-rose-500/20',
-        properties: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20',
         tools: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20',
+        mctools: 'bg-purple-600 text-white shadow-lg shadow-purple-500/20',
         playit: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
       };
       activeBtn.className = `cat-pill flex-1 min-w-[110px] px-3.5 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${colors[category] || 'bg-cyan-500 text-white'}`;
@@ -518,6 +530,78 @@ class MarketplaceController {
     }
   }
 
+  async renderImporterView() {
+    const container = document.getElementById('marketplace-view-content');
+    if (!container) return;
+
+    await this.ensureActiveServerId();
+
+    if (!this.currentServerId) {
+      container.innerHTML = `
+        <div class="glass-panel p-12 rounded-3xl border border-white/10 text-center space-y-4 max-w-lg mx-auto">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30">
+            <i data-lucide="download-cloud" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-white">Server Importer</h3>
+            <p class="text-xs text-slate-400 mt-1">Please select or deploy a server to import archives or external files.</p>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    const imp = window.serverImporter || (typeof serverImporter !== 'undefined' ? serverImporter : null);
+    if (imp) {
+      await imp.renderImporterTab(container, this.currentServerId);
+    } else {
+      container.innerHTML = `
+        <div class="glass-panel p-12 rounded-3xl border border-rose-500/20 text-center space-y-3 max-w-lg mx-auto">
+          <p class="text-sm font-bold text-rose-400">Server Importer module could not be initialized.</p>
+          <button onclick="marketplace.renderImporterView()" class="btn-cyber px-4 py-2 rounded-xl text-xs font-bold">Retry</button>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
+  async renderSplitterView() {
+    const container = document.getElementById('marketplace-view-content');
+    if (!container) return;
+
+    await this.ensureActiveServerId();
+
+    if (!this.currentServerId) {
+      container.innerHTML = `
+        <div class="glass-panel p-12 rounded-3xl border border-white/10 text-center space-y-4 max-w-lg mx-auto">
+          <div class="w-14 h-14 rounded-2xl bg-violet-500/20 text-violet-400 flex items-center justify-center mx-auto border border-violet-500/30">
+            <i data-lucide="git-fork" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-white">Server Splitter</h3>
+            <p class="text-xs text-slate-400 mt-1">Please select or deploy a server to split memory and cores into sub-instances.</p>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    const split = window.serverSplitter || (typeof serverSplitter !== 'undefined' ? serverSplitter : null);
+    if (split) {
+      await split.renderSplitterTab(container, this.currentServerId);
+    } else {
+      container.innerHTML = `
+        <div class="glass-panel p-12 rounded-3xl border border-rose-500/20 text-center space-y-3 max-w-lg mx-auto">
+          <p class="text-sm font-bold text-rose-400">Server Splitter module could not be initialized.</p>
+          <button onclick="marketplace.renderSplitterView()" class="btn-cyber px-4 py-2 rounded-xl text-xs font-bold">Retry</button>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
   async renderCurrentView() {
     if (this.activeTab === 'installed') {
       await this.renderInstalledView();
@@ -525,6 +609,10 @@ class MarketplaceController {
       await this.renderVersionChangerView();
     } else if (this.activeTab === 'players') {
       await this.renderPlayerManagerView();
+    } else if (this.activeTab === 'importer') {
+      await this.renderImporterView();
+    } else if (this.activeTab === 'splitter') {
+      await this.renderSplitterView();
     } else if (this.activeTab === 'world') {
       await this.renderWorldsMarketplaceView();
     } else if (this.activeTab === 'properties') {
@@ -1236,7 +1324,19 @@ class MarketplaceController {
   }
 
   async uninstallAddon(fileName, directory) {
-    if (!confirm(`Are you sure you want to uninstall and delete "${fileName}"?`)) return;
+    const ok = await app.confirm({
+      tag: 'UNINSTALL ADDON',
+      tagIcon: 'trash-2',
+      title: 'Uninstall Addon',
+      badge: window.location.host,
+      message: `Are you sure you want to uninstall and delete "${fileName}"?`,
+      subtext: 'This addon file and its associated data will be removed from your server.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Uninstall',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     try {
       app.toast(`Uninstalling ${fileName}...`, 'info');
@@ -2394,9 +2494,19 @@ class MarketplaceController {
   // Delete World
   async deleteServerWorld(worldName) {
     if (!this.currentServerId) return;
-    if (!confirm(`Are you sure you want to permanently DELETE world "${worldName}"? This action CANNOT be undone.`)) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'DELETE WORLD',
+      tagIcon: 'globe',
+      title: 'Delete World',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently DELETE world "${worldName}"?`,
+      subtext: 'This action CANNOT be undone! All region files, structures and player data will be erased.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete World',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     try {
       const res = await app.api(`/api/servers/${this.currentServerId}/worlds/delete`, {
@@ -2417,9 +2527,19 @@ class MarketplaceController {
   // Reset / Regenerate World
   async resetServerWorld(worldName) {
     if (!this.currentServerId) return;
-    if (!confirm(`Are you sure you want to RESET world "${worldName}"? All chunk modifications, buildings, and region files will be deleted and regenerated afresh.`)) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'RESET WORLD',
+      tagIcon: 'refresh-cw',
+      title: 'Reset World',
+      badge: window.location.host,
+      message: `Are you sure you want to RESET world "${worldName}"?`,
+      subtext: 'All chunk modifications, buildings, and region files will be deleted and regenerated afresh.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reset World',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     try {
       app.toast(`Resetting world "${worldName}"...`, 'info');
@@ -3524,10 +3644,19 @@ sudo apt install -y playit</pre>
 
   async uninstallPlayit() {
     if (!this.currentServerId) return;
-
-    if (!confirm('Are you sure you want to uninstall Playit.gg and remove its plugin & config from this server?')) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'UNINSTALL PLAYIT',
+      tagIcon: 'unlink',
+      title: 'Uninstall Playit',
+      badge: window.location.host,
+      message: 'Are you sure you want to uninstall Playit.gg and remove its plugin & config from this server?',
+      subtext: 'External tunneling tunnels and routing through Playit will be disconnected.',
+      icon: 'unlink',
+      confirmIcon: 'unlink',
+      confirmText: 'Uninstall Playit',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     try {
       const res = await app.api('/api/marketplace/playit/uninstall', {
@@ -4849,9 +4978,19 @@ sudo apt install -y playit</pre>
 
   async optimizeServerProperties() {
     if (!this.currentServerId) return;
-    if (!confirm('Apply high-performance server.properties preset (View Distance 8, Simulation 6, Sync Chunks False)?')) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'OPTIMIZE PRESET',
+      tagIcon: 'sliders',
+      title: 'Apply Preset',
+      badge: window.location.host,
+      message: 'Apply high-performance server.properties preset (View Distance 8, Simulation 6, Sync Chunks False)?',
+      subtext: 'Key performance flags will be updated for optimized TPS and lower RAM usage.',
+      icon: 'sliders',
+      confirmIcon: 'check',
+      confirmText: 'Apply Preset',
+      type: 'info'
+    });
+    if (!ok) return;
 
     try {
       app.toast('Applying performance optimizations...', 'info');
@@ -4876,9 +5015,19 @@ sudo apt install -y playit</pre>
 
   async cleanServerLogs() {
     if (!this.currentServerId) return;
-    if (!confirm('Delete old archived logs (*.log.gz) and crash dumps to free up server disk space?')) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'CLEAN LOGS',
+      tagIcon: 'trash-2',
+      title: 'Clean Logs',
+      badge: window.location.host,
+      message: 'Delete old archived logs (*.log.gz) and crash dumps to free up server disk space?',
+      subtext: 'Archived historical log files will be purged. Current console logs will not be affected.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Clean Logs',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     const btn = document.getElementById('clean-logs-btn');
     const origHtml = btn ? btn.innerHTML : null;

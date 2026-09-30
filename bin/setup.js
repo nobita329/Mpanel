@@ -64,6 +64,7 @@ async function main() {
   if (!fs.existsSync(envPath)) {
     const jwtSecret = crypto.randomBytes(32).toString('hex');
     const envContent = `# Mpanel Configuration Environment
+PANEL_NAME=Mpanel
 NODE_ENV=production
 PORT_WEB=3001
 PORT_API=3003
@@ -73,12 +74,19 @@ JWT_EXPIRES_IN=7d
 CURSEFORGE_API_KEY=$2a$10$2LouREiMl.mx0kVBK.RlK.nloje4XS3oF8uSw809VZr07O.0A5cLq
 CURSEFORGE_BASE_URL=https://api.curseforge.com/v1
 
-# Database Configuration (MariaDB / MySQL)
+# Database Configuration (Panel DB - MariaDB)
 DB_HOST=127.0.0.1
-DB_PORT=27017
+DB_PORT=3002
 DB_USER=panel
 DB_PASSWORD=PanelPass123!
 DB_NAME=panel
+
+# Server Database Host Configuration (Server DB - MySQL 8.4)
+SERVER_DB_HOST=127.0.0.1
+SERVER_DB_PORT=3005
+SERVER_DB_USER=root
+SERVER_DB_PASSWORD=YourStrongPassword
+SERVER_DB_DATABASE=mydatabase
 `;
     fs.writeFileSync(envPath, envContent, 'utf8');
     log('🔐 Generated secure .env configuration file.');

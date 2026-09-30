@@ -39,6 +39,8 @@ const autoBackupService = require('./services/autoBackupService');
 const socialLoginRoutes = require('./routes/socialLoginRoutes');
 const adminUpdateRoutes = require('./routes/adminUpdateRoutes');
 const developerProfileRoutes = require('./routes/developerProfileRoutes');
+const adminAddonsRoutes = require('./routes/adminAddonsRoutes');
+const serverAddonRoutes = require('./routes/serverAddonRoutes');
 
 
 async function bootstrap() {
@@ -79,7 +81,11 @@ async function bootstrap() {
   app.use('/api/admin/api-keys', apiKeyRoutes);
   app.use('/api/admin/extensions/autobackups', autoBackupRoutes);
   app.use('/api/admin/autobackups', autoBackupRoutes);
+  app.use('/api/admin/addons', adminAddonsRoutes);
+  app.use('/api/admin/domain', adminAddonsRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/addons', serverAddonRoutes);
+  app.use('/api/servers/:serverId/addons', serverAddonRoutes);
   app.use('/api/client/extensions/autobackups', autoBackupRoutes);
   app.use('/api', socialLoginRoutes);
   app.use('/api/servers', serverRoutes);

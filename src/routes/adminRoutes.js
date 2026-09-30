@@ -7,8 +7,10 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 const runnerService = require('../services/runnerService');
 const dockerService = require('../services/dockerService');
 const { logActivity } = require('../services/activityService');
+const path = require('path');
 const config = require('../config/config');
 const updateService = require('../services/updateService');
+const autoSuspensionService = require('../services/autoSuspensionService');
 
 let lastNet = { rx: 0, tx: 0, time: Date.now() };
 
@@ -365,6 +367,163 @@ router.get('/network', authenticate, requireAdmin, async (req, res) => {
     res.json({ success: true, allocations, nodes });
   } catch (err) {
     console.error('Admin network allocations error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ==========================================
+// ADMIN SERVERS MASS ACTIONS & MANAGEMENT (servers.zip)
+// ==========================================
+
+// Bulk Suspend Servers
+router.post('/servers/bulk-suspend', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { server_ids } = req.body;
+    if (!Array.isArray(server_ids) || server_ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No servers selected.' });
+    }
+    let count = 0;
+    for (const sid of server_ids) {
+      try {
+        await autoSuspensionService.suspendServer(sid, 'Bulk suspension by administrator');
+        count++;
+      } catch (e) {
+        console.warn(`Bulk suspend failed for server ${sid}:`, e.message);
+      }
+    }
+    logActivity(req.user.id, null, 'SERVER_BULK_SUSPEND', `Suspended ${count} servers`, req);
+    res.json({ success: true, count, message: `Successfully suspended ${count} server(s).` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Bulk Unsuspend Servers
+router.post('/servers/bulk-unsuspend', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { server_ids } = req.body;
+    if (!Array.isArray(server_ids) || server_ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No servers selected.' });
+    }
+    let count = 0;
+    for (const sid of server_ids) {
+      try {
+        await autoSuspensionService.unsuspendServer(sid);
+        count++;
+      } catch (e) {
+        console.warn(`Bulk unsuspend failed for server ${sid}:`, e.message);
+      }
+    }
+    logActivity(req.user.id, null, 'SERVER_BULK_UNSUSPEND', `Unsuspended ${count} servers`, req);
+    res.json({ success: true, count, message: `Successfully unsuspended ${count} server(s).` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Bulk Delete Servers
+router.post('/servers/bulk-delete', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { server_ids, force } = req.body;
+    if (!Array.isArray(server_ids) || server_ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No servers selected.' });
+    }
+    let count = 0;
+    for (const sid of server_ids) {
+      try {
+        const s = await query.get('SELECT * FROM servers WHERE id = ?', [sid]);
+        if (!s) continue;
+        try {
+          if (typeof runnerService.stopStatsMonitoring === 'function') runnerService.stopStatsMonitoring(Number(sid));
+          if (runnerService.isServerRunning(sid)) await runnerService.killServer(sid);
+        } catch (e) {}
+        try {
+          if (dockerService.isAvailable && dockerService.docker) {
+            await dockerService.removeContainer(sid, s.uuid);
+          }
+        } catch (e) {}
+        try {
+          await query.run('UPDATE allocations SET server_id = NULL, assigned = 0 WHERE server_id = ? OR id = ?', [sid, s.allocation_id || 0]);
+        } catch (e) {}
+        const serverDir = path.join(config.SERVERS_DIR, `server${sid}`);
+        if (fs.existsSync(serverDir)) {
+          try { fs.rmSync(serverDir, { recursive: true, force: true }); } catch (e) {}
+        }
+        await query.run('DELETE FROM servers WHERE id = ?', [sid]);
+        count++;
+      } catch (e) {
+        console.warn(`Bulk delete failed for server ${sid}:`, e.message);
+      }
+    }
+    logActivity(req.user.id, null, 'SERVER_BULK_DELETE', `Deleted ${count} servers${force ? ' (force)' : ''}`, req);
+    res.json({ success: true, count, message: `Successfully deleted ${count} server(s).` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Bulk Transfer Servers to a Destination Node
+router.post('/servers/bulk-transfer', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { server_ids, node_id, include_backups } = req.body;
+    if (!Array.isArray(server_ids) || server_ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No servers selected.' });
+    }
+    if (!node_id) {
+      return res.status(400).json({ success: false, error: 'Destination node is required.' });
+    }
+    const targetNode = await query.get('SELECT id, name FROM nodes WHERE id = ?', [node_id]);
+    if (!targetNode) {
+      return res.status(404).json({ success: false, error: 'Destination node not found.' });
+    }
+    let count = 0;
+    for (const sid of server_ids) {
+      try {
+        await query.run('UPDATE servers SET node_id = ? WHERE id = ?', [node_id, sid]);
+        count++;
+      } catch (e) {
+        console.warn(`Bulk transfer failed for server ${sid}:`, e.message);
+      }
+    }
+    logActivity(req.user.id, null, 'SERVER_BULK_TRANSFER', `Transferred ${count} servers to node ${targetNode.name}`, req);
+    res.json({ success: true, count, message: `Successfully transferred ${count} server(s) to ${targetNode.name}.` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Toggle Install Status (Admin)
+router.post('/servers/:id/toggle-install', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const serverId = req.params.id;
+    const server = await query.get('SELECT id, name, status FROM servers WHERE id = ?', [serverId]);
+    if (!server) return res.status(404).json({ success: false, error: 'Server not found.' });
+
+    const newStatus = server.status === 'installing' ? 'offline' : 'installing';
+    await query.run('UPDATE servers SET status = ? WHERE id = ?', [newStatus, serverId]);
+    logActivity(req.user.id, serverId, 'SERVER_TOGGLE_INSTALL', `Toggled install status to ${newStatus}`, req);
+
+    res.json({ success: true, status: newStatus, message: `Server install status set to ${newStatus}.` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Single Server Transfer (Admin)
+router.post('/servers/:id/transfer', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const serverId = req.params.id;
+    const { node_id, include_backups } = req.body;
+    if (!node_id) return res.status(400).json({ success: false, error: 'Target node is required.' });
+
+    const node = await query.get('SELECT id, name FROM nodes WHERE id = ?', [node_id]);
+    if (!node) return res.status(404).json({ success: false, error: 'Target node not found.' });
+
+    await query.run('UPDATE servers SET node_id = ? WHERE id = ?', [node_id, serverId]);
+    logActivity(req.user.id, serverId, 'SERVER_TRANSFER', `Transferred server to ${node.name}`, req);
+
+    res.json({ success: true, message: `Server successfully transferred to ${node.name}.` });
+  } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });

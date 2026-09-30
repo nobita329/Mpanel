@@ -63,6 +63,12 @@ router.post('/login', async (req, res) => {
       { expiresIn: config.JWT_EXPIRES_IN }
     );
 
+    // Record last login time and IP
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+    try {
+      await query.run('UPDATE users SET last_login_at = CURRENT_TIMESTAMP, last_login_ip = ? WHERE id = ?', [String(clientIp).substring(0, 64), user.id]);
+    } catch (e) {}
+
     logActivity(user.id, null, 'USER_LOGIN', 'Successful login', req);
 
     res.json({

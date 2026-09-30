@@ -889,18 +889,54 @@ class SagaPlayerManager {
     this.handleAction('ban', { username, reason });
   }
 
-  handleUnbanIp(ip) {
-    if (!confirm(`Are you sure you want to unban IP: ${ip}?`)) return;
+  async handleUnbanIp(ip) {
+    const ok = await app.confirm({
+      tag: 'UNBAN IP',
+      tagIcon: 'shield',
+      title: 'Unban Network IP',
+      badge: window.location.host,
+      message: `Are you sure you want to unban IP: ${ip}?`,
+      subtext: 'This client address will be permitted to reconnect to the server.',
+      icon: 'shield',
+      confirmIcon: 'check',
+      confirmText: 'Unban IP',
+      type: 'info'
+    });
+    if (!ok) return;
     this.handleAction('unban-ip', { ip });
   }
 
-  handleKillPlayer(username) {
-    if (!confirm(`Are you sure you want to kill ${username}?`)) return;
+  async handleKillPlayer(username) {
+    const ok = await app.confirm({
+      tag: 'KILL PLAYER',
+      tagIcon: 'alert-triangle',
+      title: 'Kill Player',
+      badge: window.location.host,
+      message: `Are you sure you want to kill ${username}?`,
+      subtext: 'The in-game entity will be instantly eliminated on the live server.',
+      icon: 'alert-triangle',
+      confirmIcon: 'trash-2',
+      confirmText: 'Kill Player',
+      type: 'danger'
+    });
+    if (!ok) return;
     this.handleAction('kill', { username });
   }
 
-  handleClearInventory(username) {
-    if (!confirm(`WARNING: Are you sure you want to clear the entire inventory of ${username}?`)) return;
+  async handleClearInventory(username) {
+    const ok = await app.confirm({
+      tag: 'CLEAR INVENTORY',
+      tagIcon: 'trash-2',
+      title: 'Clear Inventory',
+      badge: window.location.host,
+      message: `WARNING: Are you sure you want to clear the entire inventory of ${username}?`,
+      subtext: 'All armor, tools, and inventory slots will be purged without recovery.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Wipe Inventory',
+      type: 'danger'
+    });
+    if (!ok) return;
     this.handleAction('clear-inventory', { username });
   }
 

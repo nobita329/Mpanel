@@ -654,10 +654,20 @@ class WorldManagerController {
   }
 
   // Confirm Reset World
-  confirmResetWorld(worldName) {
-    if (!confirm(`⚠️ ARE YOU SURE YOU WANT TO RESET "${worldName}"?\n\nThis will permanently DELETE all chunk regions, player modifications, and entity data for this world.\n\nA brand new world will be generated on next server boot.`)) {
-      return;
-    }
+  async confirmResetWorld(worldName) {
+    const ok = await app.confirm({
+      tag: 'RESET WORLD',
+      tagIcon: 'refresh-cw',
+      title: 'Reset World',
+      badge: window.location.host,
+      message: `Are you sure you want to RESET world "${worldName}"?`,
+      subtext: 'This will permanently DELETE all chunk regions, player modifications, and entity data for this world.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reset World',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     this.executeResetWorld(worldName);
   }
@@ -678,10 +688,20 @@ class WorldManagerController {
   }
 
   // Confirm Delete World
-  confirmDeleteWorld(worldName) {
-    if (!confirm(`Are you sure you want to permanently delete the world folder "${worldName}" and its dimensions?\n\nThis action CANNOT be undone!`)) {
-      return;
-    }
+  async confirmDeleteWorld(worldName) {
+    const ok = await app.confirm({
+      tag: 'DELETE WORLD',
+      tagIcon: 'globe',
+      title: 'Delete World',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently delete world "${worldName}"?`,
+      subtext: 'All dimension folders, region files, and level data will be removed. This action CANNOT be undone!',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete World',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     this.executeDeleteWorld(worldName);
   }
@@ -949,8 +969,19 @@ class WorldManagerController {
 
   async installCurseForgeItem(modId, fileId, modName) {
     try {
-      const customName = prompt(`Enter world folder name for "${modName}":`, modName.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_'));
-      if (!customName) return;
+      const defaultFolder = modName.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_');
+      const customName = await app.prompt({
+        tag: 'CURSEFORGE MAP',
+        tagIcon: 'globe',
+        title: 'Install World Map',
+        message: `Enter world folder name for "${modName}":`,
+        placeholder: defaultFolder,
+        defaultValue: defaultFolder,
+        confirmText: 'Install World',
+        confirmIcon: 'download',
+        type: 'fuchsia'
+      });
+      if (!customName || !customName.trim()) return;
 
       app.toast(`Downloading CurseForge map "${modName}"...`, 'info');
       const res = await app.api('/api/marketplace/curseforge/install', {
@@ -1291,8 +1322,19 @@ class WorldManagerController {
   }
 
   async executeGeneratorInstall(id, title, levelType, encodedSettings, gameMode, difficulty, structures) {
-    const worldName = prompt(`Enter world folder name for "${title}":`, `${id.replace('gen-', '')}_world`);
-    if (!worldName) return;
+    const defaultWorldName = `${id.replace('gen-', '')}_world`;
+    const worldName = await app.prompt({
+      tag: 'WORLD GENERATOR',
+      tagIcon: 'globe',
+      title: 'Generate World',
+      message: `Enter world folder name for "${title}":`,
+      placeholder: defaultWorldName,
+      defaultValue: defaultWorldName,
+      confirmText: 'Generate World',
+      confirmIcon: 'cpu',
+      type: 'fuchsia'
+    });
+    if (!worldName || !worldName.trim()) return;
 
     try {
       const res = await app.api(`/api/servers/${this.currentServerId}/worlds/create`, {

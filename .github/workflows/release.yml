@@ -1,4 +1,4 @@
-name: Create Release
+name: Release & Version Tag
 
 on:
   push:
@@ -7,11 +7,6 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g. v2.5.3)'
-        required: true
-        default: 'v2.5.3'
 
 permissions:
   contents: write
@@ -20,7 +15,6 @@ jobs:
   release:
     name: Build & Publish Release
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -34,82 +28,42 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci --omit=dev || npm install --omit=dev
+        run: npm ci || npm install
 
       - name: Determine Version
         id: get_version
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/}"
-          else
-            PKG_VER=$(node -p "require('./package.json').version")
-            VERSION="v${PKG_VER}"
-          fi
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Release Version: ${VERSION}"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: v$VERSION"
 
-      - name: Create Git Tag if missing
+      - name: Create or Update Tag
+        id: tag_version
         run: |
-          VERSION="${{ steps.get_version.outputs.VERSION }}"
-          if ! git rev-parse "$VERSION" >/dev/null 2>&1; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git tag -a "$VERSION" -m "Release $VERSION"
-            git push origin "$VERSION" || echo "Tag may already exist on remote"
+          TAG_NAME="${{ steps.get_version.outputs.VERSION }}"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists, generating build release..."
+            TAG_NAME="${TAG_NAME}-build.${{ github.run_number }}"
           fi
-
-      - name: Package Mpanel Tarball & Zip
-        run: |
-          VERSION="${{ steps.get_version.outputs.VERSION }}"
-          mkdir -p dist
-          tar --exclude='./dist' --exclude='./.git' --exclude='./.github' -czf "dist/mpanel-${VERSION}.tar.gz" .
-          zip -r "dist/mpanel-${VERSION}.zip" . -x "./dist/*" "./.git/*" "./.github/*"
+          echo "TAG=$TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Mpanel ${{ steps.get_version.outputs.VERSION }}
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.tag_version.outputs.TAG }}
+          name: "Mpanel ${{ steps.tag_version.outputs.TAG }}"
+          body: |
+            ## 🎮 Mpanel Release ${{ steps.tag_version.outputs.TAG }}
+
+            ### ✨ What's New
+            - Upgraded Modern Glassmorphism UI across Modals, Prompts, and Toasts.
+            - Enhanced Addon Pack v2.0.2 integration (Marketplace & Admin Addons).
+            - MariaDB & MySQL 8.4 Multi-Database Engine support (Ports 3002 & 3005).
+            - Optimized PM2 cluster management, SFTP, and API daemon architecture.
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/commits/${{ steps.tag_version.outputs.TAG }}
           draft: false
           prerelease: false
-          files: |
-            dist/mpanel-${{ steps.get_version.outputs.VERSION }}.tar.gz
-            dist/mpanel-${{ steps.get_version.outputs.VERSION }}.zip
           generate_release_notes: true
-          body: |
-            ## 🎮 Mpanel - Full Node.js Game & App Management Web Panel
-
-            ### ✨ What's New in ${{ steps.get_version.outputs.VERSION }}
-            - Added **LucentUI Theme v2.0.0** (Zaqua / AquaGeprek minimalist glass aesthetic)
-            - Added **DezerX Theme & Vulcan Asset Suite** (Official game banners, CPU monitors, OS badges)
-            - Added **Java 26** support (`ghcr.io/pterodactyl/yolks:java_26`)
-            - Real-time glassmorphism, multi-theme selector, and enhanced server cards
-
-            ### 🚀 Port Architecture
-            - **Web UI & Console WebSocket**: Port `3001`
-            - **Panel & Daemon REST API**: Port `3003`
-            - **Embedded SFTP Server**: Port `3004`
-
-            ### 📦 Supported Environments
-            - **Minecraft**: Java 8-26 & Bedrock (Paper, Purpur, Fabric, Forge, NeoForge, Quilt, Velocity, etc.)
-            - **Node.js**: v12 - v25 Apps & Bots
-            - **Python**: v2.7, 3.7 - 3.13 Apps & Bots
-
-            ### 🛠️ Quick Start
-            ```bash
-            # Interactive Menu
-            ./menu.sh
-
-            # Install & Build
-            ./menu.sh install
-
-            # Create Admin User
-            ./menu.sh usercreate
-
-            # Start with PM2
-            ./menu.sh pm2
-            ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

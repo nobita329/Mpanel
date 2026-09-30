@@ -1,0 +1,45 @@
+{
+    "1": [
+        "Fabric",
+        "NeoForge",
+        "Forge",
+        "quilt"
+    ],
+    "2": [
+        "Fabric",
+        "NeoForge",
+        "Forge",
+        "quilt"
+    ],
+    "3": [
+        "Fabric",
+        "NeoForge",
+        "Forge",
+        "quilt"
+    ],
+    "4": [
+        "Fabric",
+        "NeoForge",
+        "Forge",
+        "quilt"
+    ],
+    "5": [
+        "Purpur",
+        "Pufferfish",
+        "Paper",
+        "Spigot",
+        "CraftBukkit",
+        "Vanilla",
+        "Folia",
+        "Velocity (Proxy)",
+        "Waterfall (Proxy)"
+    ],
+    "999": [
+        "spigot",
+        "Purpur"
+    ],
+    "1000": [
+        "*",
+        "the star disallows all services"
+    ]
+}

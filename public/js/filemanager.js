@@ -554,7 +554,17 @@ class FileManager {
 
   async handleBulkArchive() {
     if (this.selectedFiles.size === 0) return;
-    const outputName = prompt('Enter archive name (e.g. backup.zip):', 'archive.zip');
+    const outputName = await app.prompt({
+      tag: 'COMPRESS ARCHIVE',
+      tagIcon: 'archive',
+      title: 'Create Archive',
+      message: 'Enter archive name (e.g. backup.zip):',
+      placeholder: 'backup.zip',
+      defaultValue: 'archive.zip',
+      confirmText: 'Create Archive',
+      confirmIcon: 'archive',
+      type: 'fuchsia'
+    });
     if (!outputName) return;
 
     app.toast('Compressing selected items...', 'info');
@@ -576,7 +586,19 @@ class FileManager {
 
   async handleBulkTrash() {
     if (this.selectedFiles.size === 0) return;
-    if (!confirm(`Move ${this.selectedFiles.size} items to Trash Bin?`)) return;
+    const ok = await app.confirm({
+      tag: 'MOVE TO TRASH',
+      tagIcon: 'trash-2',
+      title: 'Move to Trash',
+      badge: window.location.host,
+      message: `Move ${this.selectedFiles.size} items to Trash Bin?`,
+      subtext: 'Items can be inspected and restored or permanently wiped from the Trash Bin.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Move to Trash',
+      type: 'warning'
+    });
+    if (!ok) return;
 
     try {
       await app.api(`/api/servers/${this.serverId}/files/move-to-trash`, {
@@ -594,7 +616,19 @@ class FileManager {
 
   async handleBulkDeletePermanent() {
     if (this.selectedFiles.size === 0) return;
-    if (!confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to permanently destroy ${this.selectedFiles.size} items? This CANNOT be undone!`)) return;
+    const ok = await app.confirm({
+      tag: 'PERMANENT DELETE',
+      tagIcon: 'alert-triangle',
+      title: 'Permanent Delete',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently destroy ${this.selectedFiles.size} items?`,
+      subtext: '⚠️ CRITICAL WARNING: This action CANNOT be undone! Selected items will be erased from disk.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Destroy Items',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     try {
       for (const item of this.selectedFiles) {
@@ -613,7 +647,17 @@ class FileManager {
 
   async handleBulkMovePrompt() {
     if (this.selectedFiles.size === 0) return;
-    const dest = prompt('Enter destination directory path (relative to /home/container):', this.currentPath || '');
+    const dest = await app.prompt({
+      tag: 'BULK MOVE',
+      tagIcon: 'folder',
+      title: 'Move Selected Items',
+      message: 'Enter destination directory path (relative to /home/container):',
+      placeholder: 'e.g. plugins or leave blank for root',
+      defaultValue: this.currentPath || '',
+      confirmText: 'Move Items',
+      confirmIcon: 'check',
+      type: 'fuchsia'
+    });
     if (dest === null) return;
 
     try {
@@ -635,7 +679,17 @@ class FileManager {
 
   async handleBulkCopyPrompt() {
     if (this.selectedFiles.size === 0) return;
-    const dest = prompt('Enter destination folder for copy:', this.currentPath || '');
+    const dest = await app.prompt({
+      tag: 'BULK COPY',
+      tagIcon: 'copy',
+      title: 'Copy Selected Items',
+      message: 'Enter destination folder for copy:',
+      placeholder: 'e.g. backup or leave blank for root',
+      defaultValue: this.currentPath || '',
+      confirmText: 'Copy Items',
+      confirmIcon: 'copy',
+      type: 'fuchsia'
+    });
     if (dest === null) return;
 
     try {
@@ -990,7 +1044,19 @@ class FileManager {
   }
 
   async emptyTrash() {
-    if (!confirm('Permanently wipe and empty the Trash Bin?')) return;
+    const ok = await app.confirm({
+      tag: 'EMPTY TRASH',
+      tagIcon: 'trash-2',
+      title: 'Empty Trash',
+      badge: window.location.host,
+      message: 'Permanently wipe and empty the Trash Bin?',
+      subtext: 'All trashed files and folders will be irrevocably purged from storage.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Empty Trash',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       await app.api(`/api/servers/${this.serverId}/files/empty-trash`, { method: 'POST' });
       app.toast('Trash bin emptied successfully.', 'info');
@@ -1314,11 +1380,21 @@ class FileManager {
     }
   }
 
-  closeEditor() {
+  async closeEditor() {
     if (this.aceEditor && this.aceEditor.getValue() !== this.editorOriginalContent) {
-      if (!confirm('You have unsaved changes. Are you sure you want to exit without saving?')) {
-        return;
-      }
+      const ok = await app.confirm({
+        tag: 'UNSAVED CHANGES',
+        tagIcon: 'alert-triangle',
+        title: 'Unsaved Changes',
+        badge: window.location.host,
+        message: 'You have unsaved changes. Are you sure you want to exit without saving?',
+        subtext: 'Any modifications you made in this file will be discarded.',
+        icon: 'alert-triangle',
+        confirmIcon: 'x',
+        confirmText: 'Discard & Exit',
+        type: 'warning'
+      });
+      if (!ok) return;
     }
     document.getElementById('modal-container').innerHTML = '';
     this.aceEditor = null;
@@ -1711,16 +1787,36 @@ class FileManager {
   // --------------------------------------------------------------------------
   // 17. Standard Modals (New File, New Folder, Rename, Copy, Extract, Delete)
   // --------------------------------------------------------------------------
-  showNewFileModal() {
-    const name = prompt('Enter new file name (e.g. config.yml, script.js):');
-    if (!name) return;
+  async showNewFileModal() {
+    const name = await app.prompt({
+      tag: 'NEW FILE',
+      tagIcon: 'file-plus',
+      title: 'Create New File',
+      message: 'Enter new file name (e.g. config.yml, script.js):',
+      placeholder: 'e.g. config.yml',
+      defaultValue: '',
+      confirmText: 'Create File',
+      confirmIcon: 'plus',
+      type: 'fuchsia'
+    });
+    if (!name || !name.trim()) return;
     const rel = this.currentPath ? `${this.currentPath}/${name.trim()}` : name.trim();
     this.openEditor(rel);
   }
 
-  showNewFolderModal() {
-    const name = prompt('Enter new folder name:');
-    if (!name) return;
+  async showNewFolderModal() {
+    const name = await app.prompt({
+      tag: 'NEW FOLDER',
+      tagIcon: 'folder-plus',
+      title: 'Create New Folder',
+      message: 'Enter new folder name:',
+      placeholder: 'e.g. plugins, logs',
+      defaultValue: '',
+      confirmText: 'Create Folder',
+      confirmIcon: 'plus',
+      type: 'fuchsia'
+    });
+    if (!name || !name.trim()) return;
     const rel = this.currentPath ? `${this.currentPath}/${name.trim()}` : name.trim();
     app.api(`/api/servers/${this.serverId}/files/directory`, {
       method: 'POST',
@@ -1731,10 +1827,20 @@ class FileManager {
     }).catch(err => app.toast(err.message, 'error'));
   }
 
-  promptRename(relPath) {
+  async promptRename(relPath) {
     const currentName = relPath.split('/').pop();
-    const newName = prompt('Enter new name:', currentName);
-    if (!newName || newName === currentName) return;
+    const newName = await app.prompt({
+      tag: 'RENAME ITEM',
+      tagIcon: 'edit-3',
+      title: 'Rename File or Folder',
+      message: `Enter new name for "${currentName}":`,
+      placeholder: currentName,
+      defaultValue: currentName,
+      confirmText: 'Rename',
+      confirmIcon: 'check',
+      type: 'fuchsia'
+    });
+    if (!newName || !newName.trim() || newName.trim() === currentName) return;
 
     const parent = relPath.split('/').slice(0, -1).join('/');
     const targetNew = parent ? `${parent}/${newName.trim()}` : newName.trim();
@@ -1748,29 +1854,50 @@ class FileManager {
     }).catch(err => app.toast(err.message, 'error'));
   }
 
-  promptCopy(relPath) {
+  async promptCopy(relPath) {
     const base = relPath.split('/').pop();
     const parent = relPath.split('/').slice(0, -1).join('/');
-    const dest = prompt('Duplicate as:', parent ? `${parent}/copy_${base}` : `copy_${base}`);
-    if (!dest) return;
+    const defaultCopy = parent ? `${parent}/copy_${base}` : `copy_${base}`;
+    const dest = await app.prompt({
+      tag: 'DUPLICATE ITEM',
+      tagIcon: 'copy',
+      title: 'Duplicate File or Folder',
+      message: `Duplicate "${base}" as:`,
+      placeholder: defaultCopy,
+      defaultValue: defaultCopy,
+      confirmText: 'Duplicate',
+      confirmIcon: 'copy',
+      type: 'fuchsia'
+    });
+    if (!dest || !dest.trim()) return;
 
     app.api(`/api/servers/${this.serverId}/files/copy`, {
       method: 'POST',
-      body: JSON.stringify({ sourcePath: relPath, destPath: dest })
+      body: JSON.stringify({ sourcePath: relPath, destPath: dest.trim() })
     }).then(() => {
       app.toast('Item duplicated!', 'success');
       this.refresh();
     }).catch(err => app.toast(err.message, 'error'));
   }
 
-  promptExtract(relPath) {
-    const dest = prompt('Extract to directory:', this.currentPath || '');
+  async promptExtract(relPath) {
+    const dest = await app.prompt({
+      tag: 'EXTRACT ARCHIVE',
+      tagIcon: 'archive',
+      title: 'Extract Archive',
+      message: 'Extract to directory (relative to /home/container):',
+      placeholder: 'Leave blank for root, or specify directory...',
+      defaultValue: this.currentPath || '',
+      confirmText: 'Extract',
+      confirmIcon: 'arrow-down-circle',
+      type: 'fuchsia'
+    });
     if (dest === null) return;
 
     app.toast('Extracting archive...', 'info');
     app.api(`/api/servers/${this.serverId}/files/extract`, {
       method: 'POST',
-      body: JSON.stringify({ zipFilePath: relPath, destPath: dest })
+      body: JSON.stringify({ zipFilePath: relPath, destPath: dest.trim() })
     }).then(() => {
       app.toast('Archive extracted!', 'success');
       this.refresh();
@@ -1778,7 +1905,20 @@ class FileManager {
   }
 
   async deleteSinglePermanent(relPath) {
-    if (!confirm(`⚠️ Are you sure you want to permanently delete "${relPath.split('/').pop()}"?`)) return;
+    const fileName = relPath.split('/').pop();
+    const ok = await app.confirm({
+      tag: 'DELETE FILE',
+      tagIcon: 'alert-triangle',
+      title: 'Permanent Delete',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently delete "${fileName}"?`,
+      subtext: 'This action cannot be undone and will permanently remove this file.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete File',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       await app.api(`/api/servers/${this.serverId}/files/delete`, {
         method: 'POST',

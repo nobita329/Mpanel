@@ -54,48 +54,976 @@ class App {
     } catch (e) {}
   }
 
-  // Toast Notification System
-  toast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+  // Toast Notification System (Image Spec: Modern Glassmorphic Neon Notification Cards)
+  toast(messageOrOpts, type = 'info', extraOpts = {}) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'fixed top-5 right-5 z-[99999] flex flex-col gap-3 pointer-events-none max-w-[calc(100vw-24px)]';
+      document.body.appendChild(container);
+    }
+
+    // Resolve options
+    let opts = typeof messageOrOpts === 'object' && messageOrOpts !== null
+      ? messageOrOpts
+      : { message: messageOrOpts, type, ...extraOpts };
+
+    let toastType = opts.type || type || 'info';
+    if (toastType === 'danger' || toastType === 'red') toastType = 'error';
+    if (toastType === 'warn' || toastType === 'yellow') toastType = 'warning';
+    if (toastType === 'blue') toastType = 'info';
+    if (toastType === 'green') toastType = 'success';
+
+    let rawMessage = String(opts.message || '');
+    let title = opts.title;
+    let messageText = rawMessage;
+    let host = opts.host || window.location.host || '127.0.0.1:3001';
+    let duration = opts.duration || 4200;
+
+    // Smart title and message detection matching user screenshot
+    if (!title) {
+      const lower = rawMessage.toLowerCase();
+      if (lower.includes('port unassigned') || (lower.includes('port') && lower.includes('unassigned'))) {
+        title = 'Port Unassigned';
+        if (rawMessage === 'Port unassigned.' || rawMessage === 'Port unassigned') {
+          messageText = 'Port is now available.';
+        }
+      } else if (lower.includes('failed to unassign') || lower.includes('unassign failed')) {
+        title = 'Unassign Failed';
+        if (rawMessage.startsWith('Failed to unassign port:')) {
+          messageText = rawMessage.replace('Failed to unassign port:', '').trim() || 'Failed to unassign port.';
+        } else {
+          messageText = 'Failed to unassign port.';
+        }
+      } else if (lower.includes('port in use') || (lower.includes('port') && lower.includes('in use'))) {
+        title = 'Port In Use';
+        messageText = 'Port is currently in use.';
+      } else if (lower.includes('please try again later')) {
+        title = 'Information';
+        messageText = 'Please try again later.';
+      } else if (lower.includes('primary port')) {
+        title = 'Primary Port';
+      } else if (lower.includes('backup restored')) {
+        title = 'Backup Restored';
+      } else if (lower.includes('backup deleted')) {
+        title = 'Backup Deleted';
+      } else if (lower.includes('schedule deleted')) {
+        title = 'Schedule Deleted';
+      } else if (lower.includes('server reinstalled')) {
+        title = 'Server Reinstalled';
+      } else if (lower.includes('subdomain deleted') || lower.includes('subdomain created')) {
+        title = lower.includes('deleted') ? 'Subdomain Deleted' : 'Subdomain Created';
+      } else if (lower.includes('cache cleaned')) {
+        title = 'Cache Cleaned';
+      } else {
+        const defaultTitles = {
+          success: 'Success',
+          error: 'Action Failed',
+          warning: 'Warning',
+          info: 'Information'
+        };
+        title = defaultTitles[toastType] || 'Notification';
+      }
+    }
+
+    const themes = {
+      success: {
+        borderGlow: 'border-emerald-500/50 shadow-[0_0_25px_rgba(16,185,129,0.3)]',
+        outerRing: 'bg-emerald-950/70 border-emerald-500/40',
+        innerBadge: `
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 shadow-[0_0_12px_rgba(16,185,129,0.7)]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        `,
+        titleColor: 'text-emerald-400',
+        progressBar: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]'
+      },
+      error: {
+        borderGlow: 'border-rose-500/50 shadow-[0_0_25px_rgba(244,63,94,0.3)]',
+        outerRing: 'bg-rose-950/70 border-rose-500/40',
+        innerBadge: `
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-500 flex items-center justify-center text-white shadow-[0_0_12px_rgba(244,63,94,0.7)]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </div>
+        `,
+        titleColor: 'text-rose-400',
+        progressBar: 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.9)]'
+      },
+      warning: {
+        borderGlow: 'border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.3)]',
+        outerRing: 'bg-amber-950/70 border-amber-500/40',
+        innerBadge: `
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500/25 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]">
+            <svg class="w-4 h-4 fill-amber-400/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+        `,
+        titleColor: 'text-amber-400',
+        progressBar: 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.9)]'
+      },
+      info: {
+        borderGlow: 'border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)]',
+        outerRing: 'bg-cyan-950/70 border-cyan-500/40',
+        innerBadge: `
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-cyan-500/25 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+        `,
+        titleColor: 'text-cyan-400',
+        progressBar: 'bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.9)]'
+      }
+    };
+
+    const theme = themes[toastType] || themes.info;
 
     const toast = document.createElement('div');
-    const bgColors = {
-      success: 'bg-emerald-600/90 border-emerald-400 text-white',
-      error: 'bg-rose-600/90 border-rose-400 text-white',
-      warning: 'bg-amber-600/90 border-amber-400 text-white',
-      info: 'bg-cyan-600/90 border-cyan-400 text-white'
-    };
+    toast.className = `w-[320px] sm:w-[350px] p-3.5 sm:p-4 rounded-[20px] bg-[#0c0d14]/95 border ${theme.borderGlow} backdrop-blur-xl pointer-events-auto select-none transition-all transform duration-300 translate-x-8 opacity-0 shadow-2xl relative overflow-hidden`;
 
-    const icons = {
-      success: 'check-circle',
-      error: 'alert-circle',
-      warning: 'alert-triangle',
-      info: 'info'
-    };
-
-    toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl backdrop-blur-md pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 text-xs font-medium ${bgColors[type] || bgColors.info}`;
     toast.innerHTML = `
-      <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i>
-      <span>${message}</span>
+      <div class="flex items-start gap-3">
+        <!-- Circular Outer Ring + Inner Icon Badge -->
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full ${theme.outerRing} border flex items-center justify-center shrink-0">
+          ${theme.innerBadge}
+        </div>
+
+        <!-- Middle Content Area -->
+        <div class="flex-1 min-w-0 pt-0.5">
+          <h4 class="text-sm font-bold ${theme.titleColor} leading-tight truncate">
+            ${this.escapeHtml(title)}
+          </h4>
+          <div class="text-[11px] font-mono text-slate-400 mt-0.5 truncate">
+            ${this.escapeHtml(host)}
+          </div>
+          <p class="text-xs text-slate-300 mt-1 leading-snug break-words">
+            ${this.escapeHtml(messageText)}
+          </p>
+        </div>
+
+        <!-- Top Right Close Button -->
+        <button class="toast-close-btn text-slate-400 hover:text-white transition p-0.5 -mr-1 -mt-0.5 cursor-pointer shrink-0" title="Dismiss">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Bottom Animated Progress Bar -->
+      <div class="w-full bg-white/10 h-1 rounded-full overflow-hidden mt-3">
+        <div class="toast-progress-bar h-full ${theme.progressBar} rounded-full" style="width: 100%;"></div>
+      </div>
     `;
 
     container.appendChild(toast);
-    if (window.lucide) lucide.createIcons();
 
-    setTimeout(() => {
-      toast.classList.remove('translate-y-2', 'opacity-0');
-    }, 10);
+    const progressBar = toast.querySelector('.toast-progress-bar');
+    const closeBtn = toast.querySelector('.toast-close-btn');
 
-    setTimeout(() => {
-      toast.classList.add('opacity-0', 'translate-y-2');
-      setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    let dismissed = false;
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      toast.classList.add('opacity-0', 'translate-x-8', 'scale-95');
+      setTimeout(() => toast.remove(), 250);
+    };
+
+    if (closeBtn) closeBtn.onclick = dismiss;
+
+    // Trigger Entrance animation & Progress Bar countdown
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-x-8', 'opacity-0');
+      if (progressBar) {
+        progressBar.style.transition = `width ${duration}ms linear`;
+        progressBar.style.width = '0%';
+      }
+    });
+
+    let timer = setTimeout(dismiss, duration);
+
+    // Pause timer and progress on hover
+    toast.onmouseenter = () => {
+      clearTimeout(timer);
+      if (progressBar) {
+        const computedWidth = window.getComputedStyle(progressBar).width;
+        progressBar.style.transition = 'none';
+        progressBar.style.width = computedWidth;
+      }
+    };
+    toast.onmouseleave = () => {
+      timer = setTimeout(dismiss, 1200);
+    };
   }
 
   // Compatibility alias for toast
-  showToast(message, type = 'info') {
-    return this.toast(message, type);
+  showToast(message, type = 'info', opts = {}) {
+    return this.toast(message, type, opts);
+  }
+
+  // Helper for instant SVG icons with full fallback
+  renderIcon(name, className = 'w-5 h-5') {
+    switch (name) {
+      case 'file-plus':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>`;
+      case 'folder-plus':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>`;
+      case 'folder':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+      case 'edit-3':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
+      case 'copy':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+      case 'terminal':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`;
+      case 'server':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>`;
+      case 'sliders':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`;
+      case 'arrow-down-circle':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 12 16 16 12"></polyline><line x1="12" y1="8" x2="12" y2="16"></line></svg>`;
+      case 'cpu':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>`;
+      case 'plus':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+      case 'unlink':
+      case 'broken-link':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18.84 12.25l1.72-1.71a4.5 4.5 0 0 0-6.36-6.36l-1.72 1.71"></path>
+          <path d="M5.16 11.75l-1.72 1.71a4.5 4.5 0 0 0 6.36 6.36l1.72-1.71"></path>
+          <line x1="8" y1="2" x2="8" y2="5"></line>
+          <line x1="2" y1="8" x2="5" y2="8"></line>
+          <line x1="16" y1="19" x2="16" y2="22"></line>
+          <line x1="19" y1="16" x2="22" y2="16"></line>
+        </svg>`;
+      case 'trash-2':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+      case 'alert-triangle':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      case 'refresh-cw':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
+      case 'archive':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>`;
+      case 'database':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`;
+      case 'globe':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+      case 'key':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"></circle><path d="M10.5 12.5L21 2"></path><path d="M18 5l2 2"></path><path d="M14 9l2 2"></path></svg>`;
+      case 'monitor':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+      case 'x':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+      case 'check':
+        return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      default:
+        return `<i data-lucide="${name || 'help-circle'}" class="${className}"></i>`;
+    }
+  }
+
+  // Modern Glassmorphism Confirmation Modal (Image 2 Spec)
+  confirm(options) {
+    return new Promise((resolve) => {
+      let opts = typeof options === 'string' ? { message: options } : (options || {});
+      const renderIcon = (name, className = 'w-5 h-5') => this.renderIcon(name, className);
+
+      // Heuristic string detection
+      const rawMsg = opts.message || '';
+      let tag = opts.tag;
+      let tagIcon = opts.tagIcon;
+      let title = opts.title;
+      let message = rawMsg;
+      let subtext = opts.subtext || '';
+      let icon = opts.icon;
+      let confirmIcon = opts.confirmIcon;
+      let confirmText = opts.confirmText;
+      let cancelText = opts.cancelText || 'Cancel';
+      let type = opts.type || 'fuchsia';
+      let badge = opts.badge || window.location.host || '127.0.0.1:3001';
+      let badgeIcon = opts.badgeIcon || 'monitor';
+
+      if (!tag || !title) {
+        if (/unassign.*port|port.*unassign/i.test(rawMsg)) {
+          tag = tag || 'UNASSIGN PORT';
+          tagIcon = tagIcon || 'unlink';
+          title = title || 'Unassign Port';
+          subtext = subtext || 'This will release the port and make it available for other servers.';
+          icon = icon || 'unlink';
+          confirmIcon = confirmIcon || 'unlink';
+          confirmText = confirmText || 'Unassign Port';
+          type = opts.type || 'fuchsia';
+        } else if (/delete.*server|destroy.*server/i.test(rawMsg)) {
+          tag = tag || 'DELETE SERVER';
+          tagIcon = tagIcon || 'alert-triangle';
+          title = title || 'Delete Server';
+          subtext = subtext || 'This action cannot be undone and will permanently destroy all server files.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Delete Server';
+          type = opts.type || 'danger';
+        } else if (/reinstall.*server/i.test(rawMsg)) {
+          tag = tag || 'REINSTALL SERVER';
+          tagIcon = tagIcon || 'refresh-cw';
+          title = title || 'Reinstall Server';
+          subtext = subtext || 'Reinstalling will stop the server and wipe default configuration files.';
+          icon = icon || 'refresh-cw';
+          confirmIcon = confirmIcon || 'refresh-cw';
+          confirmText = confirmText || 'Reinstall';
+          type = opts.type || 'warning';
+        } else if (/drop.*database|delete.*database/i.test(rawMsg)) {
+          tag = tag || 'DROP DATABASE';
+          tagIcon = tagIcon || 'database';
+          title = title || 'Delete Database';
+          subtext = subtext || 'All stored tables, records and schema data will be permanently removed.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Delete Database';
+          type = opts.type || 'danger';
+        } else if (/reset.*password/i.test(rawMsg)) {
+          tag = tag || 'RESET PASSWORD';
+          tagIcon = tagIcon || 'key';
+          title = title || 'Reset Password';
+          subtext = subtext || 'Any connected plugins will fail to authenticate until reconfigured.';
+          icon = icon || 'key';
+          confirmIcon = confirmIcon || 'refresh-cw';
+          confirmText = confirmText || 'Reset Password';
+          type = opts.type || 'warning';
+        } else if (/backup.*restore|restore.*backup/i.test(rawMsg)) {
+          tag = tag || 'RESTORE BACKUP';
+          tagIcon = tagIcon || 'archive';
+          title = title || 'Restore Backup';
+          subtext = subtext || 'All existing server files will be overwritten with the backup state.';
+          icon = icon || 'archive';
+          confirmIcon = confirmIcon || 'refresh-cw';
+          confirmText = confirmText || 'Restore';
+          type = opts.type || 'warning';
+        } else if (/delete.*backup/i.test(rawMsg)) {
+          tag = tag || 'DELETE BACKUP';
+          tagIcon = tagIcon || 'archive';
+          title = title || 'Delete Backup';
+          subtext = subtext || 'This backup archive will be permanently erased from storage.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Delete Backup';
+          type = opts.type || 'danger';
+        } else if (/subdomain/i.test(rawMsg)) {
+          tag = tag || 'DELETE SUBDOMAIN';
+          tagIcon = tagIcon || 'globe';
+          title = title || 'Delete Subdomain';
+          subtext = subtext || 'DNS records and traffic routing for this subdomain will be removed.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Delete Subdomain';
+          type = opts.type || 'danger';
+        } else if (/startup.*command|startup.*profile/i.test(rawMsg)) {
+          tag = tag || 'DELETE PROFILE';
+          tagIcon = tagIcon || 'sliders';
+          title = title || 'Delete Profile';
+          subtext = subtext || 'This startup profile configuration will be removed.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Delete Profile';
+          type = opts.type || 'danger';
+        } else if (/fivem.*cache/i.test(rawMsg)) {
+          tag = tag || 'CLEAN CACHE';
+          tagIcon = tagIcon || 'trash-2';
+          title = title || 'Clean Cache';
+          subtext = subtext || 'Temporary runtime cache will be purged and rebuilt on next boot.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Clean Cache';
+          type = opts.type || 'warning';
+        } else if (/disconnect/i.test(rawMsg)) {
+          tag = tag || 'DISCONNECT';
+          tagIcon = tagIcon || 'unlink';
+          title = title || 'Disconnect Domain';
+          subtext = subtext || 'The domain mapping will be detached from this panel instance.';
+          icon = icon || 'unlink';
+          confirmIcon = confirmIcon || 'unlink';
+          confirmText = confirmText || 'Disconnect';
+          type = opts.type || 'danger';
+        } else if (/delete|remove|wipe|destroy|kill/i.test(rawMsg)) {
+          tag = tag || 'PERMANENT ACTION';
+          tagIcon = tagIcon || 'alert-triangle';
+          title = title || 'Confirm Delete';
+          subtext = subtext || 'This action is permanent and cannot be undone.';
+          icon = icon || 'trash-2';
+          confirmIcon = confirmIcon || 'trash-2';
+          confirmText = confirmText || 'Delete';
+          type = opts.type || 'danger';
+        } else if (/reset|revert/i.test(rawMsg)) {
+          tag = tag || 'RESET DEFAULTS';
+          tagIcon = tagIcon || 'refresh-cw';
+          title = title || 'Reset Defaults';
+          subtext = subtext || 'All customized options will be restored to their factory state.';
+          icon = icon || 'refresh-cw';
+          confirmIcon = confirmIcon || 'refresh-cw';
+          confirmText = confirmText || 'Reset';
+          type = opts.type || 'warning';
+        } else {
+          tag = tag || 'CONFIRM ACTION';
+          tagIcon = tagIcon || 'help-circle';
+          title = title || 'Please Confirm';
+          icon = icon || 'help-circle';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Confirm';
+          type = opts.type || 'fuchsia';
+        }
+      }
+
+      tagIcon = tagIcon || 'help-circle';
+      icon = icon || 'help-circle';
+      confirmIcon = confirmIcon || icon;
+      confirmText = confirmText || 'Confirm';
+
+      const themeStyles = {
+        fuchsia: {
+          borderGlow: 'border-fuchsia-500/40 shadow-[0_0_50px_rgba(217,70,239,0.3)]',
+          tagPill: 'bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-300',
+          iconBox: 'bg-fuchsia-950/40 border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_25px_rgba(217,70,239,0.22)]',
+          accentColor: 'text-fuchsia-400',
+          confirmBtn: 'bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 hover:from-fuchsia-500 hover:via-pink-500 hover:to-rose-500 text-white shadow-[0_0_25px_rgba(217,70,239,0.45)] border border-fuchsia-400/40'
+        },
+        danger: {
+          borderGlow: 'border-rose-500/40 shadow-[0_0_50px_rgba(244,63,94,0.3)]',
+          tagPill: 'bg-rose-500/15 border-rose-500/30 text-rose-300',
+          iconBox: 'bg-rose-950/40 border-rose-500/30 text-rose-400 shadow-[0_0_25px_rgba(244,63,94,0.22)]',
+          accentColor: 'text-rose-400',
+          confirmBtn: 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:via-red-500 hover:to-rose-600 text-white shadow-[0_0_25px_rgba(244,63,94,0.45)] border border-rose-400/40'
+        },
+        warning: {
+          borderGlow: 'border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.3)]',
+          tagPill: 'bg-amber-500/15 border-amber-500/30 text-amber-300',
+          iconBox: 'bg-amber-950/40 border-amber-500/30 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.22)]',
+          accentColor: 'text-amber-400',
+          confirmBtn: 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 hover:from-amber-500 hover:via-amber-400 hover:to-yellow-500 text-white shadow-[0_0_25px_rgba(245,158,11,0.45)] border border-amber-400/40'
+        },
+        info: {
+          borderGlow: 'border-cyan-500/40 shadow-[0_0_50px_rgba(6,182,212,0.3)]',
+          tagPill: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300',
+          iconBox: 'bg-cyan-950/40 border-cyan-500/30 text-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.22)]',
+          accentColor: 'text-cyan-400',
+          confirmBtn: 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white shadow-[0_0_25px_rgba(6,182,212,0.45)] border border-cyan-400/40'
+        }
+      };
+
+      const style = themeStyles[type] || themeStyles[type === 'red' ? 'danger' : type === 'yellow' ? 'warning' : type === 'pink' ? 'fuchsia' : 'fuchsia'] || themeStyles.fuchsia;
+
+      // Format title into white first word(s) + colored last word
+      let formattedTitle = opts.titleHtml;
+      if (!formattedTitle && title) {
+        const words = title.trim().split(/\s+/);
+        if (words.length <= 1) {
+          formattedTitle = `<span class="text-white">${this.escapeHtml(words[0])}</span>`;
+        } else {
+          const firstPart = words.slice(0, -1).join(' ');
+          const lastWord = words[words.length - 1];
+          formattedTitle = `<span class="text-white">${this.escapeHtml(firstPart)} </span><span class="${style.accentColor}">${this.escapeHtml(lastWord)}</span>`;
+        }
+      }
+
+      // Build Modal DOM
+      const overlay = document.createElement('div');
+      overlay.id = 'mpanel-confirm-overlay';
+      overlay.className = 'fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 transition-opacity duration-200 select-none';
+
+      overlay.innerHTML = `
+        <div id="mpanel-confirm-modal-box" class="relative w-full max-w-[560px] rounded-[24px] bg-[#12101c]/95 border ${style.borderGlow} p-6 sm:p-7 backdrop-blur-2xl transform scale-95 transition-all duration-200 shadow-2xl">
+          <!-- Top Row: Tag Pill & Close Button -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full ${style.tagPill} border text-[11px] font-bold tracking-wider uppercase">
+              ${renderIcon(tagIcon, 'w-3.5 h-3.5 shrink-0')}
+              <span>${this.escapeHtml(tag)}</span>
+            </div>
+            <button id="mpanel-confirm-close-btn" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer" title="Close">
+              ${renderIcon('x', 'w-4 h-4')}
+            </button>
+          </div>
+
+          <!-- Middle Content Row: Large Square Icon + Text Details -->
+          <div class="flex items-start gap-5 mt-4 mb-6">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl ${style.iconBox} border flex items-center justify-center shrink-0">
+              ${renderIcon(icon, 'w-10 h-10 sm:w-12 sm:h-12')}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-2xl sm:text-[28px] font-extrabold tracking-tight leading-tight">
+                ${formattedTitle}
+              </h3>
+              ${badge ? `
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-xs font-mono font-medium mt-2">
+                  ${renderIcon(badgeIcon, 'w-3.5 h-3.5 text-slate-400 shrink-0')}
+                  <span>${this.escapeHtml(badge)}</span>
+                </div>
+              ` : ''}
+              <p class="text-slate-200 text-sm sm:text-[15px] font-normal mt-3 leading-relaxed">
+                ${this.escapeHtml(message)}
+              </p>
+              ${subtext ? `
+                <p class="text-slate-400 text-xs sm:text-[13px] mt-1.5 leading-relaxed font-normal">
+                  ${this.escapeHtml(subtext)}
+                </p>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons: Cancel + Confirm -->
+          <div class="flex items-center justify-end gap-3 pt-2">
+            ${opts.isAlert ? '' : `
+              <button id="mpanel-confirm-cancel-btn" class="px-5 py-2.5 rounded-xl border border-white/10 bg-[#171424] hover:bg-[#221e33] text-slate-300 hover:text-white text-sm font-medium flex items-center gap-2 transition cursor-pointer">
+                ${renderIcon('x', 'w-4 h-4')}
+                <span>${this.escapeHtml(cancelText)}</span>
+              </button>
+            `}
+            <button id="mpanel-confirm-action-btn" class="px-6 py-2.5 rounded-xl ${style.confirmBtn} text-sm font-semibold flex items-center gap-2 transition transform active:scale-95 cursor-pointer">
+              ${renderIcon(confirmIcon, 'w-4 h-4 shrink-0')}
+              <span>${this.escapeHtml(confirmText)}</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      if (window.lucide) lucide.createIcons();
+
+      const modalBox = overlay.querySelector('#mpanel-confirm-modal-box');
+      const closeBtn = overlay.querySelector('#mpanel-confirm-close-btn');
+      const cancelBtn = overlay.querySelector('#mpanel-confirm-cancel-btn');
+      const actionBtn = overlay.querySelector('#mpanel-confirm-action-btn');
+
+      const finish = (result) => {
+        overlay.classList.add('opacity-0');
+        if (modalBox) {
+          modalBox.classList.remove('scale-100');
+          modalBox.classList.add('scale-95');
+        }
+        document.removeEventListener('keydown', keydownHandler);
+        setTimeout(() => {
+          overlay.remove();
+          resolve(result);
+        }, 200);
+      };
+
+      const keydownHandler = (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          finish(false);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          finish(true);
+        }
+      };
+
+      document.addEventListener('keydown', keydownHandler);
+
+      if (closeBtn) closeBtn.onclick = () => finish(false);
+      if (cancelBtn) cancelBtn.onclick = () => finish(false);
+      if (actionBtn) {
+        actionBtn.focus();
+        actionBtn.onclick = () => finish(true);
+      }
+      overlay.onclick = (e) => {
+        if (e.target === overlay) finish(false);
+      };
+
+      requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        if (modalBox) {
+          modalBox.classList.remove('scale-95');
+          modalBox.classList.add('scale-100');
+        }
+      });
+    });
+  }
+
+  // Modern Glassmorphism Alert Modal
+  alert(options) {
+    let opts = typeof options === 'string' ? { message: options } : (options || {});
+    return this.confirm({
+      ...opts,
+      isAlert: true,
+      confirmText: opts.confirmText || 'OK',
+      confirmIcon: opts.confirmIcon || 'check'
+    });
+  }
+
+  // Modern Glassmorphism Prompt Modal
+  prompt(options, defaultVal = '') {
+    return new Promise((resolve) => {
+      let opts = typeof options === 'string' ? { message: options, defaultValue: defaultVal } : (options || {});
+      if (defaultVal && opts.defaultValue === undefined) {
+        opts.defaultValue = defaultVal;
+      }
+
+      const rawMsg = opts.message || '';
+      let tag = opts.tag;
+      let tagIcon = opts.tagIcon;
+      let title = opts.title;
+      let message = rawMsg;
+      let subtext = opts.subtext || '';
+      let icon = opts.icon;
+      let confirmIcon = opts.confirmIcon;
+      let confirmText = opts.confirmText;
+      let cancelText = opts.cancelText || 'Cancel';
+      let type = opts.type || 'fuchsia';
+      let placeholder = opts.placeholder || '';
+      let defaultValue = opts.defaultValue !== undefined && opts.defaultValue !== null ? String(opts.defaultValue) : '';
+      let inputType = opts.inputType || 'text';
+      let badge = opts.badge || window.location.host || '127.0.0.1:3001';
+      let badgeIcon = opts.badgeIcon || 'monitor';
+      let inputHelp = opts.inputHelp || '';
+
+      // Heuristic detection based on raw message
+      if (!tag || !title) {
+        if (/new file|file name|create file/i.test(rawMsg)) {
+          tag = tag || 'NEW FILE';
+          tagIcon = tagIcon || 'file-plus';
+          title = title || 'Create New File';
+          subtext = subtext || 'File will be created in the current working directory.';
+          icon = icon || 'file-plus';
+          confirmIcon = confirmIcon || 'plus';
+          confirmText = confirmText || 'Create File';
+          placeholder = placeholder || 'e.g. config.yml, script.js';
+          type = opts.type || 'fuchsia';
+        } else if (/new folder|folder name|create folder/i.test(rawMsg)) {
+          tag = tag || 'NEW FOLDER';
+          tagIcon = tagIcon || 'folder-plus';
+          title = title || 'Create New Folder';
+          subtext = subtext || 'Folder will be created in the current working directory.';
+          icon = icon || 'folder-plus';
+          confirmIcon = confirmIcon || 'plus';
+          confirmText = confirmText || 'Create Folder';
+          placeholder = placeholder || 'e.g. plugins, logs';
+          type = opts.type || 'fuchsia';
+        } else if (/rename|new name/i.test(rawMsg)) {
+          tag = tag || 'RENAME ITEM';
+          tagIcon = tagIcon || 'edit-3';
+          title = title || 'Rename Item';
+          subtext = subtext || 'Enter the new target name for this item.';
+          icon = icon || 'edit-3';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Rename';
+          placeholder = placeholder || 'Enter new name...';
+          type = opts.type || 'fuchsia';
+        } else if (/duplicate|copy/i.test(rawMsg)) {
+          tag = tag || 'DUPLICATE ITEM';
+          tagIcon = tagIcon || 'copy';
+          title = title || 'Duplicate Item';
+          subtext = subtext || 'Specify target destination path or filename.';
+          icon = icon || 'copy';
+          confirmIcon = confirmIcon || 'copy';
+          confirmText = confirmText || 'Duplicate';
+          placeholder = placeholder || 'Enter destination...';
+          type = opts.type || 'fuchsia';
+        } else if (/extract/i.test(rawMsg)) {
+          tag = tag || 'EXTRACT ARCHIVE';
+          tagIcon = tagIcon || 'archive';
+          title = title || 'Extract Archive';
+          subtext = subtext || 'Leave blank to extract into current directory.';
+          icon = icon || 'archive';
+          confirmIcon = confirmIcon || 'arrow-down-circle';
+          confirmText = confirmText || 'Extract';
+          placeholder = placeholder || 'Directory path (optional)...';
+          type = opts.type || 'fuchsia';
+        } else if (/archive name|compress/i.test(rawMsg)) {
+          tag = tag || 'COMPRESS ARCHIVE';
+          tagIcon = tagIcon || 'archive';
+          title = title || 'Create Archive';
+          subtext = subtext || 'Specify output zip filename for selected items.';
+          icon = icon || 'archive';
+          confirmIcon = confirmIcon || 'archive';
+          confirmText = confirmText || 'Compress';
+          placeholder = placeholder || 'e.g. backup.zip';
+          type = opts.type || 'fuchsia';
+        } else if (/destination directory|destination folder/i.test(rawMsg)) {
+          tag = tag || 'DESTINATION';
+          tagIcon = tagIcon || 'folder';
+          title = title || 'Destination Folder';
+          subtext = subtext || 'Relative to server root /home/container.';
+          icon = icon || 'folder';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Confirm';
+          placeholder = placeholder || 'e.g. plugins or leave blank for root';
+          type = opts.type || 'fuchsia';
+        } else if (/permission|chmod|unix/i.test(rawMsg)) {
+          tag = tag || 'PERMISSIONS';
+          tagIcon = tagIcon || 'key';
+          title = title || 'Set Permissions';
+          subtext = subtext || 'Enter 4-digit octal Unix mode (e.g. 0644 or 0755).';
+          icon = icon || 'key';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Save Mode';
+          placeholder = placeholder || '0644';
+          type = opts.type || 'warning';
+        } else if (/font size/i.test(rawMsg)) {
+          tag = tag || 'TERMINAL CONFIG';
+          tagIcon = tagIcon || 'terminal';
+          title = title || 'Terminal Font Size';
+          subtext = subtext || 'Choose a font size between 9 and 28 px.';
+          icon = icon || 'terminal';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Apply Font Size';
+          placeholder = placeholder || '12';
+          type = opts.type || 'info';
+        } else if (/variable/i.test(rawMsg)) {
+          tag = tag || 'ENVIRONMENT';
+          tagIcon = tagIcon || 'terminal';
+          title = title || 'Startup Variable';
+          subtext = subtext || 'Configure environment variable for container execution.';
+          icon = icon || 'terminal';
+          confirmIcon = confirmIcon || 'plus';
+          confirmText = confirmText || 'Save Variable';
+          placeholder = placeholder || 'e.g. SERVER_PORT';
+          type = opts.type || 'info';
+        } else if (/world.*folder|world/i.test(rawMsg)) {
+          tag = tag || 'WORLD MANAGER';
+          tagIcon = tagIcon || 'globe';
+          title = title || 'World Name';
+          subtext = subtext || 'Folder name where the world data will be generated.';
+          icon = icon || 'globe';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Create World';
+          placeholder = placeholder || 'world';
+          type = opts.type || 'fuchsia';
+        } else if (/connection profile|profile/i.test(rawMsg)) {
+          tag = tag || 'IMPORT PROFILE';
+          tagIcon = tagIcon || 'server';
+          title = title || 'Save Profile';
+          subtext = subtext || 'Enter a memorable label for this SFTP connection.';
+          icon = icon || 'server';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Save Profile';
+          placeholder = placeholder || 'e.g. Production Node';
+          type = opts.type || 'info';
+        } else if (/property|configuration|relative path/i.test(rawMsg)) {
+          tag = tag || 'CONFIGURATION';
+          tagIcon = tagIcon || 'sliders';
+          title = title || 'Config Editor';
+          subtext = subtext || 'Specify configuration parameter.';
+          icon = icon || 'sliders';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'Confirm';
+          placeholder = placeholder || 'Enter value...';
+          type = opts.type || 'fuchsia';
+        } else {
+          tag = tag || 'INPUT REQUIRED';
+          tagIcon = tagIcon || 'edit-3';
+          title = title || 'Please Provide Input';
+          icon = icon || 'edit-3';
+          confirmIcon = confirmIcon || 'check';
+          confirmText = confirmText || 'OK';
+          type = opts.type || 'fuchsia';
+        }
+      }
+
+      tagIcon = tagIcon || 'edit-3';
+      icon = icon || 'edit-3';
+      confirmIcon = confirmIcon || 'check';
+      confirmText = confirmText || 'Confirm';
+
+      const themeStyles = {
+        fuchsia: {
+          borderGlow: 'border-fuchsia-500/40 shadow-[0_0_50px_rgba(217,70,239,0.3)]',
+          tagPill: 'bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-300',
+          iconBox: 'bg-fuchsia-950/40 border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_25px_rgba(217,70,239,0.22)]',
+          accentColor: 'text-fuchsia-400',
+          inputFocus: 'border-fuchsia-500/40 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/20',
+          confirmBtn: 'bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 hover:from-fuchsia-500 hover:via-pink-500 hover:to-rose-500 text-white shadow-[0_0_25px_rgba(217,70,239,0.45)] border border-fuchsia-400/40'
+        },
+        danger: {
+          borderGlow: 'border-rose-500/40 shadow-[0_0_50px_rgba(244,63,94,0.3)]',
+          tagPill: 'bg-rose-500/15 border-rose-500/30 text-rose-300',
+          iconBox: 'bg-rose-950/40 border-rose-500/30 text-rose-400 shadow-[0_0_25px_rgba(244,63,94,0.22)]',
+          accentColor: 'text-rose-400',
+          inputFocus: 'border-rose-500/40 focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20',
+          confirmBtn: 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:via-red-500 hover:to-rose-600 text-white shadow-[0_0_25px_rgba(244,63,94,0.45)] border border-rose-400/40'
+        },
+        warning: {
+          borderGlow: 'border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.3)]',
+          tagPill: 'bg-amber-500/15 border-amber-500/30 text-amber-300',
+          iconBox: 'bg-amber-950/40 border-amber-500/30 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.22)]',
+          accentColor: 'text-amber-400',
+          inputFocus: 'border-amber-500/40 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20',
+          confirmBtn: 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 hover:from-amber-500 hover:via-amber-400 hover:to-yellow-500 text-white shadow-[0_0_25px_rgba(245,158,11,0.45)] border border-amber-400/40'
+        },
+        info: {
+          borderGlow: 'border-cyan-500/40 shadow-[0_0_50px_rgba(6,182,212,0.3)]',
+          tagPill: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300',
+          iconBox: 'bg-cyan-950/40 border-cyan-500/30 text-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.22)]',
+          accentColor: 'text-cyan-400',
+          inputFocus: 'border-cyan-500/40 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20',
+          confirmBtn: 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white shadow-[0_0_25px_rgba(6,182,212,0.45)] border border-cyan-400/40'
+        }
+      };
+
+      const style = themeStyles[type] || themeStyles[type === 'red' ? 'danger' : type === 'yellow' ? 'warning' : type === 'pink' ? 'fuchsia' : 'fuchsia'] || themeStyles.fuchsia;
+
+      // Format title into white first word(s) + colored last word
+      let formattedTitle = opts.titleHtml;
+      if (!formattedTitle && title) {
+        const words = title.trim().split(/\s+/);
+        if (words.length <= 1) {
+          formattedTitle = `<span class="text-white">${this.escapeHtml(words[0])}</span>`;
+        } else {
+          const firstPart = words.slice(0, -1).join(' ');
+          const lastWord = words[words.length - 1];
+          formattedTitle = `<span class="text-white">${this.escapeHtml(firstPart)} </span><span class="${style.accentColor}">${this.escapeHtml(lastWord)}</span>`;
+        }
+      }
+
+      // Build Modal DOM
+      const overlay = document.createElement('div');
+      overlay.id = 'mpanel-prompt-overlay';
+      overlay.className = 'fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 transition-opacity duration-200 select-none';
+
+      overlay.innerHTML = `
+        <div id="mpanel-prompt-modal-box" class="relative w-full max-w-[560px] rounded-[24px] bg-[#12101c]/95 border ${style.borderGlow} p-6 sm:p-7 backdrop-blur-2xl transform scale-95 transition-all duration-200 shadow-2xl">
+          <!-- Top Row: Tag Pill & Close Button -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full ${style.tagPill} border text-[11px] font-bold tracking-wider uppercase">
+              ${this.renderIcon(tagIcon, 'w-3.5 h-3.5 shrink-0')}
+              <span>${this.escapeHtml(tag)}</span>
+            </div>
+            <button id="mpanel-prompt-close-btn" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer" title="Close">
+              ${this.renderIcon('x', 'w-4 h-4')}
+            </button>
+          </div>
+
+          <!-- Middle Content Row: Icon Card + Text & Input Field -->
+          <div class="flex items-start gap-5 mt-4 mb-4">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl ${style.iconBox} border flex items-center justify-center shrink-0">
+              ${this.renderIcon(icon, 'w-10 h-10 sm:w-12 sm:h-12')}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-2xl sm:text-[28px] font-extrabold tracking-tight leading-tight">
+                ${formattedTitle}
+              </h3>
+              ${badge ? `
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-xs font-mono font-medium mt-2">
+                  ${this.renderIcon(badgeIcon, 'w-3.5 h-3.5 text-slate-400 shrink-0')}
+                  <span>${this.escapeHtml(badge)}</span>
+                </div>
+              ` : ''}
+              <p class="text-slate-200 text-sm sm:text-[15px] font-normal mt-3 leading-relaxed">
+                ${this.escapeHtml(message)}
+              </p>
+              ${subtext ? `
+                <p class="text-slate-400 text-xs sm:text-[13px] mt-1.5 leading-relaxed font-normal">
+                  ${this.escapeHtml(subtext)}
+                </p>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Input Box -->
+          <div class="mt-2 mb-6">
+            <div class="relative">
+              <input
+                id="mpanel-prompt-input"
+                type="${inputType}"
+                class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border ${style.inputFocus} text-white placeholder-slate-500 font-mono text-sm outline-none transition shadow-inner select-text"
+                placeholder="${this.escapeHtml(placeholder)}"
+                value="${this.escapeHtml(defaultValue)}"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            ${inputHelp ? `<p class="text-[11px] text-slate-400 mt-2 font-mono">${this.escapeHtml(inputHelp)}</p>` : ''}
+          </div>
+
+          <!-- Bottom Action Buttons: Cancel + Confirm -->
+          <div class="flex items-center justify-end gap-3 pt-2 border-t border-white/5">
+            <button id="mpanel-prompt-cancel-btn" class="px-5 py-2.5 rounded-xl border border-white/10 bg-[#171424] hover:bg-[#221e33] text-slate-300 hover:text-white text-sm font-medium flex items-center gap-2 transition cursor-pointer">
+              ${this.renderIcon('x', 'w-4 h-4')}
+              <span>${this.escapeHtml(cancelText)}</span>
+            </button>
+            <button id="mpanel-prompt-action-btn" class="px-6 py-2.5 rounded-xl ${style.confirmBtn} text-sm font-semibold flex items-center gap-2 transition transform active:scale-95 cursor-pointer">
+              ${this.renderIcon(confirmIcon, 'w-4 h-4 shrink-0')}
+              <span>${this.escapeHtml(confirmText)}</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      if (window.lucide) lucide.createIcons();
+
+      const modalBox = overlay.querySelector('#mpanel-prompt-modal-box');
+      const closeBtn = overlay.querySelector('#mpanel-prompt-close-btn');
+      const cancelBtn = overlay.querySelector('#mpanel-prompt-cancel-btn');
+      const actionBtn = overlay.querySelector('#mpanel-prompt-action-btn');
+      const inputEl = overlay.querySelector('#mpanel-prompt-input');
+
+      let resolved = false;
+      const finish = (result) => {
+        if (resolved) return;
+        resolved = true;
+        overlay.classList.add('opacity-0');
+        if (modalBox) {
+          modalBox.classList.remove('scale-100');
+          modalBox.classList.add('scale-95');
+        }
+        document.removeEventListener('keydown', keydownHandler);
+        setTimeout(() => {
+          overlay.remove();
+          resolve(result);
+        }, 200);
+      };
+
+      const keydownHandler = (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          finish(null);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const val = inputEl ? inputEl.value : '';
+          finish(val);
+        }
+      };
+
+      document.addEventListener('keydown', keydownHandler);
+
+      if (closeBtn) closeBtn.onclick = () => finish(null);
+      if (cancelBtn) cancelBtn.onclick = () => finish(null);
+      if (actionBtn) {
+        actionBtn.onclick = () => {
+          const val = inputEl ? inputEl.value : '';
+          finish(val);
+        };
+      }
+      overlay.onclick = (e) => {
+        if (e.target === overlay) finish(null);
+      };
+
+      requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        if (modalBox) {
+          modalBox.classList.remove('scale-95');
+          modalBox.classList.add('scale-100');
+        }
+        if (inputEl) {
+          inputEl.focus();
+          if (defaultValue) {
+            const lastDot = defaultValue.lastIndexOf('.');
+            if (lastDot > 0) {
+              inputEl.setSelectionRange(0, lastDot);
+            } else {
+              inputEl.select();
+            }
+          }
+        }
+      });
+    });
   }
 
   // HTML Escaper for XSS prevention and safe template rendering
@@ -442,7 +1370,47 @@ class App {
       if (portalAdminSwitchCard) portalAdminSwitchCard.classList.add('hidden');
       if (headerAdminToggleBtn) headerAdminToggleBtn.classList.add('hidden');
     }
+
+    // Impersonation Banner (from users.zip: users/view.blade.php Login as User)
+    const impersonatorToken = sessionStorage.getItem('impersonator_token');
+    let impBanner = document.getElementById('impersonation-active-banner');
+    if (impersonatorToken && user) {
+      if (!impBanner) {
+        impBanner = document.createElement('div');
+        impBanner.id = 'impersonation-active-banner';
+        impBanner.className = 'fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-amber-600 via-rose-600 to-amber-600 text-white text-xs font-bold py-2 px-4 shadow-2xl flex items-center justify-between border-b border-white/20';
+        document.body.prepend(impBanner);
+      }
+      impBanner.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+          <span>IMPERSONATION MODE: Currently logged in as <strong class="underline font-mono">${this.escapeHtml(user.username)}</strong> (${this.escapeHtml(user.email)})</span>
+        </div>
+        <button onclick="app.exitImpersonation()" class="px-3 py-1 rounded-lg bg-black/50 hover:bg-black/80 text-white border border-white/30 transition text-xs font-bold flex items-center gap-1.5 shadow">
+          Exit Impersonation &rarr; Return to Admin
+        </button>
+      `;
+    } else if (impBanner) {
+      impBanner.remove();
+    }
+
     if (window.lucide) lucide.createIcons();
+  }
+
+  exitImpersonation() {
+    const adminToken = sessionStorage.getItem('impersonator_token');
+    const adminUser = sessionStorage.getItem('impersonator_user');
+    if (adminToken) {
+      localStorage.setItem('mpanel_token', adminToken);
+      if (adminUser) localStorage.setItem('mpanel_user', adminUser);
+      sessionStorage.removeItem('impersonator_token');
+      sessionStorage.removeItem('impersonator_user');
+      const impBanner = document.getElementById('impersonation-active-banner');
+      if (impBanner) impBanner.remove();
+      this.toast('Returned to Administrator account.', 'success');
+      window.location.hash = '#admin-users';
+      window.location.reload();
+    }
   }
 
   async checkAdminUpdateBadge() {
@@ -758,10 +1726,6 @@ class App {
     const routes = [
       { tab: 'console', name: 'Console', icon: 'terminal' },
       { tab: 'files', name: 'Files', icon: 'folder' },
-      { tab: 'properties', name: 'Properties', icon: 'sliders' },
-      { tab: 'players', name: 'Players', icon: 'gamepad-2' },
-      { tab: 'importer', name: 'Importer', icon: 'download-cloud' },
-      { tab: 'splitter', name: 'Splitter', icon: 'git-fork' },
       { tab: 'marketplace', name: 'Addons', icon: 'shopping-bag' },
       { tab: 'databases', name: 'Databases', icon: 'database' },
       { tab: 'schedules', name: 'Schedules', icon: 'clock' },
@@ -870,6 +1834,21 @@ class App {
         admin.renderUpdatesView();
       } else if (hash === 'admin-settings') {
         await settingsManager.renderSettingsView();
+      } else if (hash === 'admin-addons') {
+        if (window.adminAddons && typeof window.adminAddons.renderAddonsView === 'function') {
+          await window.adminAddons.renderAddonsView();
+        } else {
+          let attempts = 0;
+          const pollTimer = setInterval(async () => {
+            attempts++;
+            if (window.adminAddons && typeof window.adminAddons.renderAddonsView === 'function') {
+              clearInterval(pollTimer);
+              await window.adminAddons.renderAddonsView();
+            } else if (attempts > 30) {
+              clearInterval(pollTimer);
+            }
+          }, 50);
+        }
       } else if (hash === 'admin-servers') {
         await admin.renderServersView();
       } else if (hash === 'admin-users') {
@@ -1817,4 +2796,10 @@ class App {
 
 window.app = new App();
 window.escapeHtml = (str) => window.app.escapeHtml(str);
+window.confirmAsync = (options) => (window.app ? window.app.confirm(options) : Promise.resolve(confirm(typeof options === 'string' ? options : (options.message || 'Confirm?'))));
+window.appConfirm = (options) => (window.app ? window.app.confirm(options) : Promise.resolve(confirm(typeof options === 'string' ? options : (options.message || 'Confirm?'))));
+window.promptAsync = (options, defaultVal) => (window.app ? window.app.prompt(options, defaultVal) : Promise.resolve(prompt(typeof options === 'string' ? options : (options.message || ''), defaultVal || '')));
+window.appPrompt = (options, defaultVal) => (window.app ? window.app.prompt(options, defaultVal) : Promise.resolve(prompt(typeof options === 'string' ? options : (options.message || ''), defaultVal || '')));
+
+
 

@@ -252,15 +252,25 @@ class AutoBackupsClient {
     }
   }
 
-  promptDelete(backupId, backupName, isLocked) {
+  async promptDelete(backupId, backupName, isLocked) {
     if (isLocked) {
       app.toast('This backup is locked. Please unlock it before deleting.', 'warning');
       return;
     }
 
-    if (!confirm(`Are you sure you want to permanently delete "${backupName}"? This action cannot be undone.`)) {
-      return;
-    }
+    const ok = await app.confirm({
+      tag: 'DELETE BACKUP',
+      tagIcon: 'archive',
+      title: 'Delete Backup',
+      badge: window.location.host,
+      message: `Are you sure you want to permanently delete "${backupName}"?`,
+      subtext: 'This backup archive will be permanently erased. This action cannot be undone.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Backup',
+      type: 'danger'
+    });
+    if (!ok) return;
 
     this.executeDelete(backupId);
   }

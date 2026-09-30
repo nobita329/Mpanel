@@ -304,7 +304,19 @@ class ServerProperties {
   }
 
   async handleDeleteSubdomain(subId) {
-    if (!confirm('Are you sure you want to delete this subdomain?')) return;
+    const ok = await app.confirm({
+      tag: 'DELETE SUBDOMAIN',
+      tagIcon: 'globe',
+      title: 'Delete Subdomain',
+      badge: window.location.host,
+      message: 'Are you sure you want to delete this subdomain?',
+      subtext: 'DNS integration and address bindings for this subdomain will be removed.',
+      icon: 'trash-2',
+      confirmIcon: 'trash-2',
+      confirmText: 'Delete Subdomain',
+      type: 'danger'
+    });
+    if (!ok) return;
     try {
       const res = await app.api(`/api/servers/${this.currentServerId}/properties/subdomains/${subId}`, {
         method: 'DELETE'

@@ -62,7 +62,7 @@
   <div id="overlay-layer"></div>
 
   <!-- Toast Notification Container -->
-  <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+  <div id="toast-container" class="fixed top-5 right-5 z-[99999] flex flex-col gap-3 pointer-events-none max-w-[calc(100vw-24px)]"></div>
 
   <!-- Top Navigation Header (NookTheme) -->
   <header id="main-header" class="nook-topbar bg-[#17171b] border-b border-white/10 shrink-0 z-30 px-5 py-2.5 flex items-center justify-between">
@@ -295,25 +295,6 @@
 
         <!-- 3. Dedicated Administration Navigation (Separate Admin Sidebar) -->
         <div id="sidebar-admin-section" class="hidden space-y-4">
-          <!-- Admin Header Card & Return Switcher -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-purple-950/70 to-indigo-950/70 border border-purple-500/30 rounded-xl">
-              <div class="flex items-center gap-2">
-                <i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i>
-                <span class="text-xs font-bold text-white tracking-wide">ADMIN PORTAL</span>
-              </div>
-              <span class="text-[9px] font-mono bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-bold border border-purple-500/30">ROOT</span>
-            </div>
-
-            <!-- Return to Client Area Button -->
-            <button onclick="app.navigate('user-overview')" class="w-full px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 flex items-center justify-between transition group">
-              <span class="flex items-center gap-2">
-                <i data-lucide="arrow-left" class="w-4 h-4 text-cyan-400 group-hover:-translate-x-0.5 transition-transform"></i>
-                <span>Client Area</span>
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono">ESC</span>
-            </button>
-          </div>
 
           <!-- Section 1: Basic Administration -->
           <div class="space-y-1">
@@ -341,6 +322,15 @@
                   <i data-lucide="sliders" class="w-5 h-5"></i>
                 </div>
                 <span>Settings</span>
+              </a>
+              <a href="#admin-addons" onclick="app.navigate('admin-addons')" id="nav-admin-addons" class="nook-nav-item">
+                <div class="nook-icon-box">
+                  <i data-lucide="package-check" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <span class="flex items-center justify-between flex-1">
+                  <span>Addons</span>
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">v2.0.2</span>
+                </span>
               </a>
               <a href="#admin-api" onclick="app.navigate('admin-api')" id="nav-admin-api" class="nook-nav-item">
                 <div class="nook-icon-box">
@@ -415,49 +405,6 @@
           </div>
         </div>
       </div>
-
-      <!-- NookTheme Quick SFTP / System Footer (Pinned at bottom of sidebar) -->
-      <div id="sidebar-system-footer" class="p-2.5 rounded-xl bg-[#14151a] border border-white/5 text-[11px] text-slate-400 space-y-1 mt-3 shrink-0">
-        <div class="flex justify-between items-center text-slate-300 font-semibold mb-1">
-          <span>System Engine</span>
-          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span>
-        </div>
-        <div class="flex justify-between">
-          <span>Web UI</span>
-          <span class="text-cyan-400 font-mono">3001</span>
-        </div>
-        <div class="flex justify-between">
-          <span>SFTP Server</span>
-          <span class="text-emerald-400 font-mono">3004</span>
-        </div>
-      </div>
-
-      <!-- Permanent Non-Removable Developer Watermark -->
-      <div id="sidebar-permanent-watermark" class="p-2.5 rounded-xl bg-gradient-to-r from-purple-950/40 via-slate-900/60 to-cyan-950/40 border border-purple-500/20 text-[11px] mt-2 shrink-0 select-none shadow-md">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0 cursor-pointer" onclick="app.showDeveloperCardModal()" title="View Nobita Developer Profile">
-            <div class="relative w-7 h-7 rounded-full overflow-hidden border border-purple-400/50 bg-slate-900 shrink-0">
-              <img id="sidebar-dev-avatar" src="/images/nobita-discord.png" class="w-[85px] max-w-none absolute -top-2.5 -left-2.5 transition-all duration-300" alt="Nobita">
-              <span id="sidebar-dev-status-dot" class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-slate-900 transition-colors duration-300" title="Discord: Online"></span>
-            </div>
-            <div class="min-w-0">
-              <div class="flex items-center gap-1">
-                <span id="sidebar-dev-name" class="font-bold text-white text-[11px] truncate">Nobita</span>
-                <span class="text-[9px] font-mono font-bold px-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">DEV</span>
-              </div>
-              <p id="sidebar-dev-handle" class="text-[10px] text-slate-400 truncate font-mono">nobita.dev</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 shrink-0">
-            <a href="https://discord.com/users/924366651443527710" target="_blank" class="w-6 h-6 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 flex items-center justify-center transition" title="Discord: <@924366651443527710>">
-              <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
-            </a>
-            <a href="https://nobitahost.in/" target="_blank" class="w-6 h-6 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 flex items-center justify-center transition" title="nobitahost.in">
-              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-            </a>
-          </div>
-        </div>
-      </div>
     </aside>
 
     <!-- Main Dynamic Content Container (Auto Responsive across Phone, Tablet, PC) -->
@@ -493,28 +440,29 @@
 
   <!-- Application Javascript Modules -->
   <script src="/js/sortable.min.js"></script>
-  <script src="/js/customServerSort.js?v=1.0.3"></script>
-  <script src="/js/auth.js?v=2.3.3"></script>
-  <script src="/js/app.js?v=3.5.5"></script>
+  <script src="/js/customServerSort.js?v=3.6.1"></script>
+  <script src="/js/auth.js?v=3.6.1"></script>
+  <script src="/js/app.js?v=3.6.1"></script>
   <script src="/js/nebulaEditor.js?v=2.0.0"></script>
   <script src="/js/discordLive.js?v=1.0.0"></script>
-  <script src="/js/settings.js?v=2.3.3"></script>
-  <script src="/js/console.js?v=3.5.2"></script>
-  <script src="/js/filemanager.js?v=3.5.1"></script>
-  <script src="/js/configEditor.js?v=1.5.0"></script>
-  <script src="/js/marketplace.js?v=2.3.5"></script>
+  <script src="/js/settings.js?v=3.6.1"></script>
+  <script src="/js/console.js?v=3.6.1"></script>
+  <script src="/js/filemanager.js?v=3.6.1"></script>
+  <script src="/js/configEditor.js?v=3.6.1"></script>
+  <script src="/js/marketplace.js?v=3.6.1"></script>
   <script src="/js/mctools.js?v=1.0.0"></script>
   <script src="/js/autoTutorial.js?v=2.1.0"></script>
   <script src="/js/knowledge.js?v=2.0.2"></script>
-  <script src="/js/versionChanger.js?v=2.3.3"></script>
-  <script src="/js/playerManager.js?v=2.3.4"></script>
-  <script src="/js/worldManager.js?v=2.3.3"></script>
-  <script src="/js/serverImporter.js?v=2.3.3"></script>
-  <script src="/js/serverProperties.js?v=2.3.3"></script>
-  <script src="/js/serverSplitter.js?v=1.1.4"></script>
-  <script src="/js/autoBackups.js?v=1.0.0"></script>
+  <script src="/js/versionChanger.js?v=3.6.1"></script>
+  <script src="/js/playerManager.js?v=3.6.1"></script>
+  <script src="/js/worldManager.js?v=3.6.1"></script>
+  <script src="/js/serverImporter.js?v=3.6.1"></script>
+  <script src="/js/serverProperties.js?v=3.6.1"></script>
+  <script src="/js/serverSplitter.js?v=3.6.1"></script>
+  <script src="/js/autoBackups.js?v=3.6.1"></script>
   <script src="/js/updates.js?v=2.4.0"></script>
-  <script src="/js/admin.js?v=3.5.4"></script>
+  <script src="/js/admin.js?v=3.6.1"></script>
+  <script src="/js/adminAddons.js?v=3.6.1"></script>
 
   <script>
     // Initialize icons on DOM load

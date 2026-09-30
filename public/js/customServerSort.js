@@ -305,8 +305,20 @@ class CustomServerSort {
     });
   }
 
-  promptReset(context = 'user') {
-    if (!confirm('Reset server sorting back to default ID order?')) return;
+  async promptReset(context = 'user') {
+    const ok = await app.confirm({
+      tag: 'RESET SORTING',
+      tagIcon: 'refresh-cw',
+      title: 'Reset Server Order',
+      badge: window.location.host,
+      message: 'Reset server sorting back to default ID order?',
+      subtext: 'Your custom drag-and-drop server positioning will revert to creation order.',
+      icon: 'refresh-cw',
+      confirmIcon: 'refresh-cw',
+      confirmText: 'Reset Order',
+      type: 'warning'
+    });
+    if (!ok) return;
     localStorage.removeItem(this.getStorageKey(context));
     this.setSortMode(context, 'custom');
     if (context === 'user' && window.app && app.token) {
